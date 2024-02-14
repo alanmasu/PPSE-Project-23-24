@@ -5,3 +5,4 @@
 .vscode/ipch
 .vscode/
 git_revision.h
+upload_port.ini
