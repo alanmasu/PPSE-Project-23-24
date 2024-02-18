@@ -26,15 +26,19 @@
 // #else
 
 // #endif
+#ifdef DEBUG
+    #define PRINTF(...) Serial1.printf(__VA_ARGS__)
+#else
+    #define PRINTF(...) Serial.printf(__VA_ARGS__)
+#endif
 
-#define PRINTF(...) Serial.printf(__VA_ARGS__)
 
 volatile uint8_t gpsUartBuffer[RX_BUFFER_SIZE];  //!< GPS UART RX buffer
 volatile bool gpsStringEnd = false;            //!< Flag for end of string
 
 GpsGGAData_t gpsGGAData;                    //!< GGA data
 GpsRMCData_t gpsRMCData;                    //!< RMC data
-//GpsGSAData_t gpsGSAData;                    //!< GSA data
+GpsGSAData_t gpsGSAData;                    //!< GSA data
 GpsGSVData_t gpsGSVData;                    //!< GSV data
 GpsVTGData_t gpsVTGData;                    //!< VTG data
 
@@ -218,15 +222,8 @@ float getLongitudeFromString(char* str){
 char* splitString(char* str, char delim, char** next){
     if(str != NULL){
         char* token = strchr(str, delim);
-        PRINTF("token start: %c, %d\n", str[65], str[65]);
-        PRINTF("SplitString: %p, %s", token, token);
         if(token != NULL){
-            *token = '\0';
-            PRINTF("token: %p,%c\n", token, *token);
-            PRINTF("token dereferenced: %p,%c\n", str+65, str[65]);
-
-            PRINTF("STR from SplitString: %p, %s\n", str, str);
-
+            *token = 0;
             if(next != NULL){
                 *next = token + 1;
             }
@@ -253,175 +250,162 @@ void gpsParseData(const char* packet){
     str = strchr(packet, '$');
     char* nextSentence = str;
     char* fields[20];
-    // PRINTF("%p,%p\n", packet, str);
-    // PRINTF("%s,%s\n", packet, str);
     //If found, validate checksum
     if(str != NULL){
         while(nextSentence != NULL){
-            // PRINTF("nextSentence: %p\n", nextSentence);
             bool valid = nmeaChecksumValidate(nextSentence, &nextSentence);
-            // PRINTF("nextSentence after: %p\n", nextSentence);
-            // PRINTF("%s,%s\n", packet, str);
-            // PRINTF("Valid: %d\n", valid);
+            PRINTF("Valid: %d\n", valid);
             if(valid){
-                PRINTF("str: %s\n", str);
                 splitString(str, '*', NULL);
-                PRINTF("str after: %s\n", str);
-                delay(3000);
-            //     char* nextField = str;
-            //     sentenceType = splitString(nextField, ',', &nextField);
+                char* nextField = str;
+                sentenceType = splitString(nextField, ',', &nextField);
 
-            //     //Get fields
-            //     int fieldIndex = 0;
-            //     do{
-            //         fields[fieldIndex] = splitString(nextField, ',', &nextField);
-            //     }while(fields[fieldIndex++] != NULL && fieldIndex < 20);
-            //     for (int i = 0; i < fieldIndex; ++i){
-            //         PRINTF("%s\n", fields[i]);
-            //     }
-            //     delay(2000);
-            //     int cmpResult = strcmp(sentenceType, RMC_SENTENCE);
-            //     if(strcmp(sentenceType, GGA_SENTENCE) == 0){
-            //         //Parse GGA data
-            //         gpsGGAData.time = getTimeFromString(fields[0]);
-            //         float latitude = getLatitudeFromString(fields[1]);
-            //         float longitude = getLongitudeFromString(fields[3]);
-            //         if(fields[2][0] == 'S'){
-            //             latitude *= -1;
-            //         }
-            //         if(fields[4][0] == 'W'){
-            //             longitude *= -1;
-            //         }
-            //         snprintf(gpsGGAData.latitude, 12, "%f", latitude);
-            //         snprintf(gpsGGAData.longitude, 12, "%f", longitude);
-            //         //Fix
-            //         gpsGGAData.fix = (GGAFixData_t)atoi(fields[5]);
-            //         //Satellites
-            //         strcpy(gpsGGAData.sats, fields[6]);
-            //         //HDOP
-            //         strcpy(gpsGGAData.hdop, fields[7]);
-            //         //Altitude
-            //         strcpy(gpsGGAData.altitude, fields[8]);
-            //         //Altitude WSG84
-            //         strcpy(gpsGGAData.altitude_WSG84, fields[10]);
+                //Get fields
+                int fieldIndex = 0;
+                do{
+                    fields[fieldIndex] = splitString(nextField, ',', &nextField);
+                }while(fields[fieldIndex++] != NULL && fieldIndex < 20);
+                
+                int cmpResult = strcmp(sentenceType, RMC_SENTENCE);
+                if(strcmp(sentenceType, GGA_SENTENCE) == 0){
+                    //Parse GGA data
+                    gpsGGAData.time = getTimeFromString(fields[0]);
+                    float latitude = getLatitudeFromString(fields[1]);
+                    float longitude = getLongitudeFromString(fields[3]);
+                    if(fields[2][0] == 'S'){
+                        latitude *= -1;
+                    }
+                    if(fields[4][0] == 'W'){
+                        longitude *= -1;
+                    }
+                    snprintf(gpsGGAData.latitude, 12, "%f", latitude);
+                    snprintf(gpsGGAData.longitude, 12, "%f", longitude);
+                    //Fix
+                    gpsGGAData.fix = (GGAFixData_t)atoi(fields[5]);
+                    //Satellites
+                    strcpy(gpsGGAData.sats, fields[6]);
+                    //HDOP
+                    strcpy(gpsGGAData.hdop, fields[7]);
+                    //Altitude
+                    strcpy(gpsGGAData.altitude, fields[8]);
+                    //Altitude WSG84
+                    strcpy(gpsGGAData.altitude_WSG84, fields[10]);
 
-            //         PRINTF("%d\t(%s,\t%s) \tFix:%d \tsats:%s \thdop:%s \talt:%s \taltGeo:%s\n\n", gpsGGAData.time,
-            //                                                                                 gpsGGAData.latitude,
-            //                                                                                 gpsGGAData.longitude,
-            //                                                                                 gpsGGAData.fix,
-            //                                                                                 gpsGGAData.sats,
-            //                                                                                 gpsGGAData.hdop,
-            //                                                                                  gpsGGAData.altitude,
-            //                                                                                  gpsGGAData.altitude_WSG84);
-            //     }else if(strcmp(sentenceType, RMC_SENTENCE) == 0){
-            //         //Parse RMC data
-            //         float latitude = getLatitudeFromString(fields[2]);
-            //         float longitude = getLongitudeFromString(fields[4]);
-            //         if(fields[3][0] == 'S'){
-            //             latitude *= -1;
-            //         }
-            //         if(fields[5][0] == 'W'){
-            //             longitude *= -1;
-            //         }
-            //         snprintf(gpsRMCData.latitude, 12, "%f", latitude);
-            //         snprintf(gpsRMCData.longitude, 12, "%f", longitude);
-            //         //Valid
-            //         gpsRMCData.valid = fields[1][0] == 'A';
-            //         //Speed
-            //         strcpy(gpsRMCData.speed, fields[6]);
-            //         //Course
-            //         strcpy(gpsRMCData.course, fields[7]);
-            //         //Date
-            //         gpsRMCData.timeInfo = getDateFromString(fields[0], fields[8]);
-            //         //Others
-            //         strcpy(gpsRMCData.others, fields[9]);
+                    PRINTF("GGA: %d\t(%s,\t%s) \tFix:%d \tsats:%s \thdop:%s \talt:%s \taltGeo:%s\n\n", (uint32_t)gpsGGAData.time,
+                                                                                            gpsGGAData.latitude,
+                                                                                            gpsGGAData.longitude,
+                                                                                            gpsGGAData.fix,
+                                                                                            gpsGGAData.sats,
+                                                                                            gpsGGAData.hdop,
+                                                                                             gpsGGAData.altitude,
+                                                                                             gpsGGAData.altitude_WSG84);
+                }else if(strcmp(sentenceType, RMC_SENTENCE) == 0){
+                    //Parse RMC data
+                    float latitude = getLatitudeFromString(fields[2]);
+                    float longitude = getLongitudeFromString(fields[4]);
+                    if(fields[3][0] == 'S'){
+                        latitude *= -1;
+                    }
+                    if(fields[5][0] == 'W'){
+                        longitude *= -1;
+                    }
+                    snprintf(gpsRMCData.latitude, 12, "%f", latitude);
+                    snprintf(gpsRMCData.longitude, 12, "%f", longitude);
+                    //Valid
+                    gpsRMCData.valid = fields[1][0] == 'A';
+                    //Speed
+                    strcpy(gpsRMCData.speed, fields[6]);
+                    //Course
+                    strcpy(gpsRMCData.course, fields[7]);
+                    //Date
+                    gpsRMCData.timeInfo = getDateFromString(fields[0], fields[8]);
+                    //Others
+                    strcpy(gpsRMCData.others, fields[9]);
 
-            //         PRINTF("(%s,\t%s) \tValid:%d \tspeed:%s \tcourse:%s \tdate:%d/%d/%d \tothers:%s\n\n",   gpsRMCData.latitude,
-            //                                                                                                 gpsRMCData.longitude,
-            //                                                                                                 gpsRMCData.valid,
-            //                                                                                                 gpsRMCData.speed,
-            //                                                                                                 gpsRMCData.course,
-            //                                                                                                 gpsRMCData.timeInfo.tm_mday,
-            //                                                                                                 gpsRMCData.timeInfo.tm_mon+1,
-            //                                                                                                 gpsRMCData.timeInfo.tm_year+1900,
-            //                                                                                                 gpsRMCData.others);
-            //     }else if(strcmp(sentenceType, GSA_SENTENCE) == 0){
-            //         //Mode
-            //         strcpy(gpsGSAData.mode, fields[0]);
-            //         //Fix
-            //         strcpy(gpsGSAData.fix, fields[1]);
-            //         //Satellites
-            //         int i;
-            //         for(i = 0; i < 12; ++i){
-            //             if(*fields[2 + i] == '\0'){
-            //                 gpsGSAData.sats[i] = -1;
-            //             }else{
-            //                 gpsGSAData.sats[i] = (int8_t)atoi(fields[2 + i]);
-            //             }
-            //         }
-            //         //PDOP
-            //         i+=2;
-            //         strcpy(gpsGSAData.pdop, fields[i]);
-            //         //HDOP
-            //         strcpy(gpsGSAData.hdop, fields[i+1]);
-            //         //VDOP
-            //         strcpy(gpsGSAData.vdop, fields[i+2]);
+                    PRINTF("RMC: (%s,\t%s) \tValid:%d \tspeed:%s \tcourse:%s \tdate:%d/%d/%d \tothers:%s\n\n",   gpsRMCData.latitude,
+                                                                                                            gpsRMCData.longitude,
+                                                                                                            gpsRMCData.valid,
+                                                                                                            gpsRMCData.speed,
+                                                                                                            gpsRMCData.course,
+                                                                                                            gpsRMCData.timeInfo.tm_mday,
+                                                                                                            gpsRMCData.timeInfo.tm_mon+1,
+                                                                                                            gpsRMCData.timeInfo.tm_year+1900,
+                                                                                                            gpsRMCData.others);
+                }else if(strcmp(sentenceType, GSA_SENTENCE) == 0){
+                    //Mode
+                    strcpy(gpsGSAData.mode, fields[0]);
+                    //Fix
+                    strcpy(gpsGSAData.fix, fields[1]);
+                    //Satellites
+                    int i;
+                    for(i = 0; i < 12; ++i){
+                        if(*fields[2 + i] == '\0'){
+                            gpsGSAData.sats[i] = -1;
+                        }else{
+                            gpsGSAData.sats[i] = (int8_t)atoi(fields[2 + i]);
+                        }
+                    }
+                    //PDOP
+                    i+=2;
+                    strcpy(gpsGSAData.pdop, fields[i]);
+                    //HDOP
+                    strcpy(gpsGSAData.hdop, fields[i+1]);
+                    //VDOP
+                    strcpy(gpsGSAData.vdop, fields[i+2]);
 
-            //         PRINTF("Mode:%s \tFix:%s \tPDOP:%s \tHDOP:%s \tVDOP:%s\n",  gpsGSAData.mode,
-            //                                                                         gpsGSAData.fix,
-            //                                                                         gpsGSAData.pdop,
-            //                                                                         gpsGSAData.hdop,
-            //                                                                         gpsGSAData.vdop);
-            //         PRINTF("Sats: \n");
-            //         for(int i = 0; gpsGSAData.sats[i] != -1 && i < 12; ++i){
-            //             PRINTF("\t%d ", gpsGSAData.sats[i]);
-            //         }
-            //         PRINTF("\n\n");
-            //     }else if(strcmp(sentenceType, GSV_SENTENCE) == 0){
-            //         //Satellites in view
-            //         uint8_t satCount = (uint8_t)atoi(fields[2]);
-            //         uint8_t mgsIndex = (uint8_t)atoi(fields[1]);
-            //         for(uint8_t i = (mgsIndex-1)*4, f = 2; i < (mgsIndex-1)*4+4 && i < satCount; ++i, f+=4){
-            //             //Satellite ID
-            //             if(fields[f][0] == 0) break;
-            //             strcpy(gpsGSVData.sats[i].id, fields[f]);
-            //             //Elevation
-            //             if(fields[f + 1][0] == 0) break;
-            //             strcpy(gpsGSVData.sats[i].elevation, fields[f+1]);
-            //             //Azimuth
-            //             if(fields[f + 2][0] == 0) break;
-            //             strcpy(gpsGSVData.sats[i].azimuth, fields[f+2]);
-            //             //SNR
-            //             if(fields[f + 3][0] == 0) break;
-            //             strcpy(gpsGSVData.sats[i].snr, fields[f+3]);
-            //         }
-            //         if(mgsIndex == 1){
-            //             PRINTF("Satellites in view: %s\n", gpsGSVData.satsInView);
-            //         }
-            //         PRINTF("Msg ID: %d\n", mgsIndex);
-            //         for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
-            //             PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
-            //             PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);
-            //             PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
-            //             PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
-            //         }
-            //     }else if(strcmp(sentenceType, GLL_SENTENCE) == 0){
+                    PRINTF("GSA: Mode:%s \tFix:%s \tPDOP:%s \tHDOP:%s \tVDOP:%s\n",  gpsGSAData.mode,
+                                                                                    gpsGSAData.fix,
+                                                                                    gpsGSAData.pdop,
+                                                                                    gpsGSAData.hdop,
+                                                                                    gpsGSAData.vdop);
+                    PRINTF("Sats: \n");
+                    for(int i = 0; gpsGSAData.sats[i] != -1 && i < 12; ++i){
+                        PRINTF("\t%d ", gpsGSAData.sats[i]);
+                    }
+                    PRINTF("\n\n");
+                }else if(strcmp(sentenceType, GSV_SENTENCE) == 0){
+                    //Satellites in view
+                    uint8_t satCount = (uint8_t)atoi(fields[2]);
+                    uint8_t mgsIndex = (uint8_t)atoi(fields[1]);
+                    for(uint8_t i = (mgsIndex-1)*4, f = 2; i < (mgsIndex-1)*4+4 && i < satCount; ++i, f+=4){
+                        //Satellite ID
+                        if(fields[f][0] == 0) break;
+                        strcpy(gpsGSVData.sats[i].id, fields[f]);
+                        //Elevation
+                        if(fields[f + 1][0] == 0) break;
+                        strcpy(gpsGSVData.sats[i].elevation, fields[f+1]);
+                        //Azimuth
+                        if(fields[f + 2][0] == 0) break;
+                        strcpy(gpsGSVData.sats[i].azimuth, fields[f+2]);
+                        //SNR
+                        if(fields[f + 3][0] == 0) break;
+                        strcpy(gpsGSVData.sats[i].snr, fields[f+3]);
+                    }
+                    if(mgsIndex == 1){
+                        PRINTF("GSV: Satellites in view: %s\n", gpsGSVData.satsInView);
+                    }
+                    PRINTF("Msg ID: %d\n", mgsIndex);
+                    for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
+                        PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
+                        PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);
+                        PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
+                        PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
+                    }
+                }else if(strcmp(sentenceType, VTG_SENTENCE) == 0){
+                    //Course
+                    strcpy(gpsVTGData.course, fields[0]);
+                    //Reference
+                    strcpy(gpsVTGData.courseM, fields[2]);
+                    //Speed in knots
+                    strcpy(gpsVTGData.speedK, fields[4]);
+                    //Speed in km/h
+                    strcpy(gpsVTGData.speed, fields[6]);
 
-            //     }else if(strcmp(sentenceType, VTG_SENTENCE) == 0){
-            //         //Course
-            //         strcpy(gpsVTGData.course, fields[0]);
-            //         //Reference
-            //         strcpy(gpsVTGData.courseM, fields[2]);
-            //         //Speed in knots
-            //         strcpy(gpsVTGData.speedK, fields[4]);
-            //         //Speed in km/h
-            //         strcpy(gpsVTGData.speed, fields[6]);
-
-            //         PRINTF("Course:%s \tReference:%s \tSpeed in knots:%s \tSpeed in km/h:%s\n\n", gpsVTGData.course,
-            //                                                                                     gpsVTGData.courseM,
-            //                                                                                     gpsVTGData.speedK,
-            //                                                                                     gpsVTGData.speed);
-            //     }
+                    PRINTF("VTG: Course:%s \tReference:%s \tSpeed in knots:%s \tSpeed in km/h:%s\n\n", gpsVTGData.course,
+                                                                                                gpsVTGData.courseM,
+                                                                                                gpsVTGData.speedK,
+                                                                                                gpsVTGData.speed);
+                }
             }
             str = nextSentence;
         }

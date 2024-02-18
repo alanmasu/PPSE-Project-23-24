@@ -10,8 +10,12 @@
 
 void setup(){
 
+  #ifdef DEBUG
+  Serial1.begin(115200);
+  #else
   Serial.begin(115200);
   while(!Serial);
+  #endif
   delay(2000);
 
 }

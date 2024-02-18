@@ -43,12 +43,12 @@
 */
 
 //GPS Sentence constants
-#define GGA_SENTENCE "$GPGGA"               //! GGA sentence
-#define RMC_SENTENCE "$GPRMC"               //! RMC sentence
-#define GSA_SENTENCE "$GPGSA"               //! GSA sentence
-#define GSV_SENTENCE "$GPGSV"               //! GSV sentence
-#define GLL_SENTENCE "$GPGLL"               //! GLL sentence
-#define VTG_SENTENCE "$GPVTG"               //! VTG sentence
+#define GGA_SENTENCE "$GNGGA"               //! GGA sentence
+#define RMC_SENTENCE "$GNRMC"               //! RMC sentence
+#define GSA_SENTENCE "$GNGSA"               //! GSA sentence
+#define GSV_SENTENCE "$GLGSV"               //! GSV sentence
+#define GLL_SENTENCE "$GNGLL"               //! GLL sentence
+#define VTG_SENTENCE "$GNVTG"               //! VTG sentence
 
 #define RX_BUFFER_SIZE 512                  //! Size of RX buffer
                                             //! Uesed also by DMA as max buffer length
