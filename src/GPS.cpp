@@ -196,21 +196,24 @@ void gpsParseData(const char* packet){
     if(packet == NULL) return;
     String str;
     String sentenceType;
+    int se=1;
     // Parse data
     // Search for '$'
-    str = "$" + splitString(String(packet), '$', 1); //"strchr(packet, '$');"
-    const char* nextSentence = str.c_str();
+    str = "$" + splitString(String(packet), '$', 1); 
+    const char* nextSentence = strchr(packet, '$');
+    //const char* nextSentence = str.c_str(); 
     String fields[20];
     // PRINTF("%p,%p\n", packet, str);
     // PRINTF("%s,%s\n", packet, str);
     //If found, validate checksum
     if(str != NULL){
         while(nextSentence != NULL){
-            PRINTF("nextSentence: %p\n", nextSentence);
+            //PRINTF("nextSentence: %p\n", nextSentence);
             bool valid = nmeaChecksumValidate(nextSentence, &nextSentence);
-            PRINTF("nextSentence after: %p\n", nextSentence);
-            PRINTF("%s\n",  str);
-            PRINTF("\nValid: %d\n", valid);
+            //PRINTF("nextSentence after: %p\n", nextSentence);
+            //PRINTF("%s\n",  str);
+            //PRINTF("\nValid: %d\n", valid);
+            PRINTF("\n\nSENTENCE %d\n\n",se);
             if(valid){
                 //PRINTF("str: %s\n", str);
                 str = splitString(str, '*', 0);
@@ -228,7 +231,7 @@ void gpsParseData(const char* packet){
                 // }
                 delay(2000);
                 // int cmpResult = strcmp(sentenceType, RMC_SENTENCE);
-                if(sentenceType == GGA_SENTENCE){
+                if(sentenceType == GGA_SENTENCE){           //STAMPA MALE TUTTO
                     //Parse GGA data
                     gpsGGAData.time = getTimeFromString(fields[0].c_str());
                     float latitude = getLatitudeFromString(fields[1].c_str());
@@ -244,7 +247,7 @@ void gpsParseData(const char* packet){
                     //Fix
                     gpsGGAData.fix = (GGAFixData_t)fields[5].toInt();
                     //Satellites
-                    strcpy(gpsGGAData.sats, fields[6].c_str());
+                    strcpy(gpsGGAData.sats, fields[8].c_str());
                     //HDOP
                     strcpy(gpsGGAData.hdop, fields[7].c_str());
                     //Altitude
@@ -260,7 +263,7 @@ void gpsParseData(const char* packet){
                                                                                             gpsGGAData.hdop,
                                                                                              gpsGGAData.altitude,
                                                                                              gpsGGAData.altitude_WSG84);
-                }else if(sentenceType == RMC_SENTENCE){
+                }else if(sentenceType == RMC_SENTENCE){     //STAMPA MALE I SECONDI
                     //Parse RMC data
                     float latitude = getLatitudeFromString(fields[2].c_str());
                     float longitude = getLongitudeFromString(fields[4].c_str());
@@ -327,7 +330,7 @@ void gpsParseData(const char* packet){
                         PRINTF("\t%d ", gpsGSAData.sats[i]);
                     }
                     PRINTF("\n\n");
-                }else if(sentenceType == GSV_SENTENCE){   //FUNZIONA MA STAMPA MALE AZIMUTH
+                }else if(sentenceType == GLGSV_SENTENCE){   //FUNZIONA MA STAMPA MALE AZIMUTH
                     //Satellites in view
                     uint8_t satCount = (uint8_t)fields[2].toInt();
                     uint8_t mgsIndex = (uint8_t)fields[1].toInt();
@@ -359,8 +362,40 @@ void gpsParseData(const char* packet){
                         PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
                         PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
                     }
-                }else if(sentenceType == GLL_SENTENCE){
+                }else if(sentenceType == GPGSV_SENTENCE){   //FUNZIONA MA STAMPA MALE AZIMUTH
+                    //Satellites in view
+                    uint8_t satCount = (uint8_t)fields[2].toInt();
+                    uint8_t mgsIndex = (uint8_t)fields[1].toInt();
+                    for(uint8_t i = (mgsIndex-1)*4, f = 3; i < (mgsIndex-1)*4+4 && i < satCount; ++i, f+=4){
+                        
+                        //Satellite ID
+                            //if(fields[f].charAt(0) == 0) break;
+                        strcpy(gpsGSVData.sats[i].id, fields[f].c_str());
 
+                        //Elevation
+                            //if(fields[f + 1].charAt(0) == 0) break;
+                        strcpy(gpsGSVData.sats[i].elevation, fields[f+1].c_str());
+
+                        //Azimuth
+                            //if(fields[f + 2].charAt(0) == 0) break;At(0) == 0) break;s
+                        strcpy(gpsGSVData.sats[i].azimuth, fields[f+2].c_str());
+                        
+                        //SNR
+                            //if(fields[f + 3].charAt(0) == 0) break;
+                        strcpy(gpsGSVData.sats[i].snr, fields[f+3].c_str());
+                    }
+                    if(mgsIndex == 1){
+                        PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
+                    }
+                    //PRINTF("Msg ID: %d\n", mgsIndex);
+                    for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
+                        PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
+                        PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);
+                        PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
+                        PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
+                    }
+                }else if(sentenceType == GLL_SENTENCE){     //VUOTA
+                    PRINTF("NON LA STAMPIAMO");
                 }else if(sentenceType == VTG_SENTENCE){
                     //Course
                     strcpy(gpsVTGData.course, fields[0].c_str());
@@ -378,6 +413,7 @@ void gpsParseData(const char* packet){
                     }
             }
             str = nextSentence;
+            se++;
         }
     }
 }
