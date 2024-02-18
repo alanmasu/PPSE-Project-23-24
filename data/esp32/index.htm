@@ -1,75 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <title>PSE Board 2023</title>
   
   <!--Pico - Minimal CSS Framework for semantic info: HTML https://picocss.com/ -->
-  <link rel="stylesheet" type="text/css" href="css/pico.fluid.classless.css">
+  <!--<link rel="stylesheet" type="text/css" href="css/pico.min.css">-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
 
   <!-- Cyustom page styling -->
-  <style>
-    html {
-      background-color: #f8f8f8d1
-    }
-    .container {
-      display: flex;
-      justify-content: center;
-      min-height: calc(100vh - 6rem);
-      padding: 1rem 0;
-    }    
-    
-    .container {
-      max-width: 860px;
-      padding: 40px;
-    }
-    
-    .field{
-      display: inline;
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
 
 </head>
-  <body onload="onLoad()">
-    <main class="container">
-      <article class="grid">
-        <div>
-          <h1>Temperature</h1>
-            <b>CPU Temperature: </b> <div class="field" id="cpu-temp">30 C°</div>
-            <br>
-            <b>Temperature: </b> <div class="field" id="temp">30 C°</div>
-          <h1>Onboard LED Switcher</h1>
-            <label for="remember">
-              <input type="checkbox" role="switch" id="toggle-OB-led" name="toggle-OB-led">
-              Toggle LED
-            </label>
-          <h1>RGB LEDs Switcher</h1>
-            <label for="remember">
-              <input type="checkbox" role="switch" id="toggle-leds" name="toggle-leds">
-              Toggle RGB LEDs
-            </label>
-          <h1>Leds setup</h1>
-            <form id="ledsForm">
-            <!--<form onsubmit="setLeds()" id="ledsForm">-->
-            <!--<form action="/setLeds" method="POST" id="ledsForm">-->
-              <div class="grid">
-                <label for="color"
-                  >Set Color
-                  <input type="color" id="color" name="color" value="#0eaaaa" />
-                </label>
-              </div>
-              
-              <label for="text">Count</label>
-              <input type="text" id="count" name="count" placeholder="Numder of leds to comand" />
-
-               Buttons 
-              <input type="reset" value="Reset" onclick="event.preventDefault()" />
-              <input type="submit" value="Submit"/>
-            </form>
+<body onload="onLoad()">
+  <nav>
+    <ul>
+      <li><strong>PPSE Project</strong></li>
+    </ul>
+    <ul>
+      <li><a href="map.html">Map</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    <article class="grid">
+      <div>
+        <h1>Temperature</h1>
+          <b>CPU Temperature: </b> <div class="field" id="cpu-temp">30 C°</div>
           <br>
-        </div>
-      </article>
-    </main>
-    <script src="script.js"></script>
-  </body>
+          <b>Temperature: </b> <div class="field" id="temp">30 C°</div>
+        <h1>Onboard LED Switcher</h1>
+          <label for="toggle-OB-led">
+            <input type="checkbox" role="switch" id="toggle-OB-led" name="toggle-OB-led">
+            Toggle LED
+          </label>
+        <h1>RGB LEDs Switcher</h1>
+          <label for="toggle-leds">
+            <input type="checkbox" role="switch" id="toggle-leds" name="toggle-leds">
+            Toggle RGB LEDs
+          </label>
+        <h1>Leds setup</h1>
+          <form id="ledsForm">
+          <!--<form onsubmit="setLeds()" id="ledsForm">-->
+          <!--<form action="/setLeds" method="POST" id="ledsForm">-->
+            <div class="grid">
+              <label for="color"
+                >Set Color
+                <input type="color" id="color" name="color" value="#0eaaaa" />
+              </label>
+            </div>
+            
+            <label for="count">Count</label>
+            <input type="text" id="count" name="count" placeholder="Numder of leds to comand" />
+
+             Buttons 
+            <input type="reset" value="Reset" onclick="event.preventDefault()" />
+            <input type="submit" value="Submit"/>
+          </form>
+        <br>
+      </div>
+    </article>
+  </main>
+  <script src="script.js"></script>
+</body>
 </html>

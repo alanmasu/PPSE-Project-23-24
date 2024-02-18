@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html {
+  background-color: #f8f8f8d1
+}
+.container {
+  display: flex;
+  justify-content: center;
+  min-height: calc(100vh - 6rem);
+  /*padding: 1rem 0;*/
+  max-width: 860px;
+  /*padding: 40px;*/
+}    
+
+/*.container {*/
+/*  max-width: 860px;*/
+/*  padding: 40px;*/
+/*}*/
+
+.field{
+  display: inline;
+}
+
+nav{
+  padding-right: 1rem;
+  padding-left: 1rem;
+  background-color: #adb5d1;
+}
