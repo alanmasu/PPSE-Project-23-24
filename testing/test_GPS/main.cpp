@@ -3,6 +3,7 @@
 //#include <SoftwareSerial.h>
 #include <PSEBoard.h>
 #include <GPS.h>
+#include <common.h>
 
 #include "simGPS.h"
 
@@ -25,7 +26,9 @@ void loop(){
   // getGSVData();
   // getVTGData();
   // Serial.println(nmeaData);
+  Serial.println("Parsing...");
   gpsParseData(nmeaData);
+  Serial.println("OK...");
 
   Serial.printf("%s\n",getGGAData()->sats);
 

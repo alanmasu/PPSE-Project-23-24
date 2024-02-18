@@ -77,38 +77,6 @@ bool nmeaChecksumValidate(const char* sentence, const char** nextSentence){
     return false;
 }
 
-
-// bool nmeaChecksumValidate(const char* sentence, char** nextSentence) {
-//     char* str;
-//     char checksum[3];
-//     uint8_t checksumCalculated = 0;
-
-//     // Cerca '*'
-//     str = strchr(sentence, '*');
-
-//     // Se trovato, valida il checksum, altrimenti restituisci false e imposta nextSentence a NULL
-//     if (str != nullptr) {
-//         *nextSentence = strchr(str, '$');
-//         // Ottieni il checksum
-//         checksum[0] = *(str + 1);
-//         checksum[1] = *(str + 2);
-//         checksum[2] = '\0';
-//         // Calcola il checksum
-//         for (int i = 1; i < str - sentence; ++i) {
-//             checksumCalculated ^= sentence[i];
-//         }
-//         // Confronta i checksum
-//         if (checksumCalculated == static_cast<uint8_t>(strtol(checksum, nullptr, 16))) {
-//             return true;
-//         } else {
-//             return false;
-//         }
-//     }
-//     *nextSentence = nullptr;
-//     return false;
-// }
-
-
 /*!
     @brief    Get time from string
     @details  This function gets the time from a string
@@ -238,11 +206,11 @@ void gpsParseData(const char* packet){
     //If found, validate checksum
     if(str != NULL){
         while(nextSentence != NULL){
-            // PRINTF("nextSentence: %p\n", nextSentence);
+            PRINTF("nextSentence: %p\n", nextSentence);
             bool valid = nmeaChecksumValidate(nextSentence, &nextSentence);
-            // PRINTF("nextSentence after: %p\n", nextSentence);
-            // PRINTF("%s,%s\n", packet, str);
-            PRINTF("Valid: %d\n", valid);
+            PRINTF("nextSentence after: %p\n", nextSentence);
+            PRINTF("%s\n",  str);
+            PRINTF("\nValid: %d\n", valid);
             if(valid){
                 //PRINTF("str: %s\n", str);
                 str = splitString(str, '*', 0);
@@ -292,8 +260,7 @@ void gpsParseData(const char* packet){
                                                                                             gpsGGAData.hdop,
                                                                                              gpsGGAData.altitude,
                                                                                              gpsGGAData.altitude_WSG84);
-                }
-            else if(sentenceType == RMC_SENTENCE){
+                }else if(sentenceType == RMC_SENTENCE){
                     //Parse RMC data
                     float latitude = getLatitudeFromString(fields[2].c_str());
                     float longitude = getLongitudeFromString(fields[4].c_str());
@@ -360,28 +327,32 @@ void gpsParseData(const char* packet){
                         PRINTF("\t%d ", gpsGSAData.sats[i]);
                     }
                     PRINTF("\n\n");
-                }else if(sentenceType == GSV_SENTENCE){
+                }else if(sentenceType == GSV_SENTENCE){   //FUNZIONA MA STAMPA MALE AZIMUTH
                     //Satellites in view
                     uint8_t satCount = (uint8_t)fields[2].toInt();
                     uint8_t mgsIndex = (uint8_t)fields[1].toInt();
-                    for(uint8_t i = (mgsIndex-1)*4, f = 2; i < (mgsIndex-1)*4+4 && i < satCount; ++i, f+=4){
+                    for(uint8_t i = (mgsIndex-1)*4, f = 3; i < (mgsIndex-1)*4+4 && i < satCount; ++i, f+=4){
+                        
                         //Satellite ID
-                        if(fields[f].charAt(0) == 0) break;
+                            //if(fields[f].charAt(0) == 0) break;
                         strcpy(gpsGSVData.sats[i].id, fields[f].c_str());
+
                         //Elevation
-                        if(fields[f + 1].charAt(0) == 0) break;
+                            //if(fields[f + 1].charAt(0) == 0) break;
                         strcpy(gpsGSVData.sats[i].elevation, fields[f+1].c_str());
+
                         //Azimuth
-                        if(fields[f + 2].charAt(0) == 0) break;
+                            //if(fields[f + 2].charAt(0) == 0) break;At(0) == 0) break;s
                         strcpy(gpsGSVData.sats[i].azimuth, fields[f+2].c_str());
+                        
                         //SNR
-                        if(fields[f + 3].charAt(0) == 0) break;
+                            //if(fields[f + 3].charAt(0) == 0) break;
                         strcpy(gpsGSVData.sats[i].snr, fields[f+3].c_str());
                     }
                     if(mgsIndex == 1){
-                        PRINTF("Satellites in view: %s\n", gpsGSVData.satsInView);
+                        PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
                     }
-                    PRINTF("Msg ID: %d\n", mgsIndex);
+                    //PRINTF("Msg ID: %d\n", mgsIndex);
                     for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
                         PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
                         PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);

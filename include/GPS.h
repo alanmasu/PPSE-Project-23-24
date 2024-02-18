@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <PSEBoard.h>
+#include <common.h>
 
 
 /*!
@@ -43,12 +44,12 @@
 */
 
 //GPS Sentence constants
-#define GGA_SENTENCE "$GPGGA"               //! GGA sentence
-#define RMC_SENTENCE "$GPRMC"               //! RMC sentence
-#define GSA_SENTENCE "$GPGSA"               //! GSA sentence
-#define GSV_SENTENCE "$GPGSV"               //! GSV sentence
-#define GLL_SENTENCE "$GPGLL"               //! GLL sentence
-#define VTG_SENTENCE "$GPVTG"               //! VTG sentence
+#define GGA_SENTENCE "$GNGGA"               //! GGA sentence
+#define RMC_SENTENCE "$GNRMC"               //! RMC sentence
+#define GSA_SENTENCE "$GNGSA"               //! GSA sentence
+#define GSV_SENTENCE "$GLGSV"               //! GSV sentence
+#define GLL_SENTENCE "$GNGLL"               //! GLL sentence
+#define VTG_SENTENCE "$GNVTG"               //! VTG sentence
 
 #define RX_BUFFER_SIZE 512                  //! Size of RX buffer
                                             //! Uesed also by DMA as max buffer length
@@ -120,11 +121,11 @@ typedef struct{
 extern volatile uint8_t gpsUartBuffer[RX_BUFFER_SIZE];
 extern volatile bool gpsStringEnd;
 
-bool nmeaChecksumValidate(const char* sentence, char** nextSentence);
+bool nmeaChecksumValidate(const char* sentence, const char** nextSentence);
 time_t getTimeFromString(const char* str);
 struct tm getDateFromString(const char* time, const char* date);
-float getLatitudeFromString(char* str);
-float getLongitudeFromString(char* str);
+float getLatitudeFromString(const char* str);
+float getLongitudeFromString(const char* str);
 char* splitString(char* str, char delim, char** next);
 
 void gpsParseData(const char* packet);
