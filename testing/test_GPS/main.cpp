@@ -1,18 +1,23 @@
 #include <Arduino.h>
 #include <Wire.h>
-//#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>
 #include <PSEBoard.h>
 #include <GPS.h>
 #include <common.h>
 
 #include "simGPS.h"
 
-//SoftwareSerial port(GPS_RX,GPS_TX);
+SoftwareSerial port(GPS_RX,GPS_TX);
 
 void setup(){
 
-  Serial.begin(115200);
-  while(!Serial);
+  #ifdef DEBUG
+    Serial1.begin(115200) ;
+  #else
+    Serial.begin(115200) ;
+    Serial.begin(115200);
+    while(!Serial);
+  #endif
   delay(2000);
 
 }
@@ -20,7 +25,7 @@ void setup(){
 void loop(){
 
   
-  //  getGGAData();
+  // getGGAData();
   // getRMCData();
   // getGSAData();
   // getGSVData();
@@ -29,8 +34,6 @@ void loop(){
   Serial.println("Parsing...");
   gpsParseData(nmeaData);
   Serial.println("OK...");
-
-  Serial.printf("%s\n",getGGAData()->sats);
 
   while(1);
   

@@ -2,8 +2,8 @@
     @file   GPS.c
     @ingroup GPS_Module
     @brief  GPS module function implementations
-    @date   10/01/2024
-    @author Alan Masutti
+    @date   19/02/2024
+    @author Andrea Farinaro
 */
 
 /*!
@@ -28,7 +28,11 @@
 
 // #endif
 
-#define PRINTF(...) Serial.printf(__VA_ARGS__)
+#ifdef DEBUG
+    #define PRINTF(...) Serial1.printf(__VA_ARGS__)
+#else
+    #define PRINTF(...) Serial.printf(__VA_ARGS__)
+#endif
 
 volatile uint8_t gpsUartBuffer[RX_BUFFER_SIZE];  //!< GPS UART RX buffer
 volatile bool gpsStringEnd = false;            //!< Flag for end of string
@@ -36,7 +40,8 @@ volatile bool gpsStringEnd = false;            //!< Flag for end of string
 GpsGGAData_t gpsGGAData;                    //!< GGA data
 GpsRMCData_t gpsRMCData;                    //!< RMC data
 GpsGSAData_t gpsGSAData;                    //!< GSA data
-GpsGSVData_t gpsGSVData;                    //!< GSV data
+GpsGLGSVData_t gpsGLGSVData; 
+GpsGPGSVData_t gpsGPGSVData;                   //!< GSV data
 GpsVTGData_t gpsVTGData;                    //!< VTG data
 
 
@@ -87,7 +92,7 @@ bool nmeaChecksumValidate(const char* sentence, const char** nextSentence){
 time_t getTimeFromString(const char* str){
     char hours[3];
     char minutes[3];
-    char seconds[5];
+    char seconds[6];
     //memcpy() copia un blocco di memoria da una parte all'altra 
     memcpy(hours,str , 2);
     memcpy(minutes, str + 2, 2);
@@ -117,7 +122,7 @@ struct tm getDateFromString(const char* time, const char* date){
     memcpy(seconds, time + 4, 2);
     hours[2] = '\0';
     minutes[2] = '\0';
-    seconds[4] = '\0';
+    seconds[3] = '\0';
     char day[3];
     char month[3];
     char year[3];
@@ -229,7 +234,7 @@ void gpsParseData(const char* packet){
                 // for (int i = 0; i < 20; ++i){
                 //     PRINTF("%s\n", fields[i].c_str());
                 // }
-                delay(2000);
+                // delay(2000);
                 // int cmpResult = strcmp(sentenceType, RMC_SENTENCE);
                 if(sentenceType == GGA_SENTENCE){           //STAMPA MALE TUTTO
                     //Parse GGA data
@@ -247,7 +252,7 @@ void gpsParseData(const char* packet){
                     //Fix
                     gpsGGAData.fix = (GGAFixData_t)fields[5].toInt();
                     //Satellites
-                    strcpy(gpsGGAData.sats, fields[8].c_str());
+                    strcpy(gpsGGAData.sats, fields[6].c_str());
                     //HDOP
                     strcpy(gpsGGAData.hdop, fields[7].c_str());
                     //Altitude
@@ -255,7 +260,7 @@ void gpsParseData(const char* packet){
                     //Altitude WSG84
                     strcpy(gpsGGAData.altitude_WSG84, fields[10].c_str());
 
-                    PRINTF("%d\t(%s,\t%s) \tFix:%d \tsats:%s \thdop:%s \talt:%s \taltGeo:%s\n\n", gpsGGAData.time,
+                    PRINTF("%lld\t (%s,%s) \tFix:%d \tsats:%s \thdop:%s \talt:%s \taltGeo:%s\n\n", gpsGGAData.time,
                                                                                             gpsGGAData.latitude,
                                                                                             gpsGGAData.longitude,
                                                                                             gpsGGAData.fix,
@@ -338,29 +343,29 @@ void gpsParseData(const char* packet){
                         
                         //Satellite ID
                             //if(fields[f].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].id, fields[f].c_str());
+                        strcpy(gpsGLGSVData.sats[i].id, fields[f].c_str());
 
                         //Elevation
                             //if(fields[f + 1].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].elevation, fields[f+1].c_str());
+                        strcpy(gpsGLGSVData.sats[i].elevation, fields[f+1].c_str());
 
                         //Azimuth
                             //if(fields[f + 2].charAt(0) == 0) break;At(0) == 0) break;s
-                        strcpy(gpsGSVData.sats[i].azimuth, fields[f+2].c_str());
+                        strcpy(gpsGLGSVData.sats[i].azimuth, fields[f+2].c_str());
                         
                         //SNR
                             //if(fields[f + 3].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].snr, fields[f+3].c_str());
+                        strcpy(gpsGLGSVData.sats[i].snr, fields[f+3].c_str());
                     }
                     if(mgsIndex == 1){
                         PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
                     }
                     //PRINTF("Msg ID: %d\n", mgsIndex);
                     for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
-                        PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
-                        PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);
-                        PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
-                        PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
+                        PRINTF("\tSatellite ID: %s\n", gpsGLGSVData.sats[i].id);
+                        PRINTF("\t\tElevation: %s\n", gpsGLGSVData.sats[i].elevation);
+                        PRINTF("\t\tAzimuth: %s\n", gpsGLGSVData.sats[i].azimuth);
+                        PRINTF("\t\tSNR: %s\n", gpsGLGSVData.sats[i].snr);
                     }
                 }else if(sentenceType == GPGSV_SENTENCE){   //FUNZIONA MA STAMPA MALE AZIMUTH
                     //Satellites in view
@@ -370,29 +375,29 @@ void gpsParseData(const char* packet){
                         
                         //Satellite ID
                             //if(fields[f].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].id, fields[f].c_str());
+                        strcpy(gpsGPGSVData.sats[i].id, fields[f].c_str());
 
                         //Elevation
                             //if(fields[f + 1].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].elevation, fields[f+1].c_str());
+                        strcpy(gpsGPGSVData.sats[i].elevation, fields[f+1].c_str());
 
                         //Azimuth
                             //if(fields[f + 2].charAt(0) == 0) break;At(0) == 0) break;s
-                        strcpy(gpsGSVData.sats[i].azimuth, fields[f+2].c_str());
+                        strcpy(gpsGPGSVData.sats[i].azimuth, fields[f+2].c_str());
                         
                         //SNR
                             //if(fields[f + 3].charAt(0) == 0) break;
-                        strcpy(gpsGSVData.sats[i].snr, fields[f+3].c_str());
+                        strcpy(gpsGPGSVData.sats[i].snr, fields[f+3].c_str());
                     }
                     if(mgsIndex == 1){
                         PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
                     }
                     //PRINTF("Msg ID: %d\n", mgsIndex);
                     for(uint8_t i = (mgsIndex-1)*4; i < (mgsIndex-1)*4+4; ++i){
-                        PRINTF("\tSatellite ID: %s\n", gpsGSVData.sats[i].id);
-                        PRINTF("\t\tElevation: %s\n", gpsGSVData.sats[i].elevation);
-                        PRINTF("\t\tAzimuth: %s\n", gpsGSVData.sats[i].azimuth);
-                        PRINTF("\t\tSNR: %s\n", gpsGSVData.sats[i].snr);
+                        PRINTF("\tSatellite ID: %s\n", gpsGPGSVData.sats[i].id);
+                        PRINTF("\t\tElevation: %s\n", gpsGPGSVData.sats[i].elevation);
+                        PRINTF("\t\tAzimuth: %s\n", gpsGPGSVData.sats[i].azimuth);
+                        PRINTF("\t\tSNR: %s\n", gpsGPGSVData.sats[i].snr);
                     }
                 }else if(sentenceType == GLL_SENTENCE){     //VUOTA
                     PRINTF("NON LA STAMPIAMO");
@@ -437,9 +442,14 @@ GpsRMCData_t* getRMCData(void){
 GpsGSAData_t* getGSAData(void){
      return &gpsGSAData;
 }
-GpsGSVData_t* getGSVData(void){
-    return &gpsGSVData;
+GpsGLGSVData_t* getGLGSVData(void){
+    return &gpsGLGSVData;
 }
+
+GpsGPGSVData_t* getGPGSVData(void){
+    return &gpsGPGSVData;
+}
+
 GpsVTGData_t* getVTGData(void){
     return &gpsVTGData;
 }

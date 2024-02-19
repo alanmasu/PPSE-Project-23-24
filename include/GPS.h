@@ -18,8 +18,8 @@
         |                 |
         -------------------
     @endcode
-    @date 10/01/2024
-    @author Alan Masutti
+    @date 19/02/2024
+    @author Andrea Farinaro
     @note This file have some functions thas uses the DMA so it is necessary to share the DMA module
           if needed some where else.
 */
@@ -56,7 +56,7 @@
                                             //! Uesed also by DMA as max buffer length
 
 //GGA fix data
-typedef enum {INVALID = 0, GPS_FIX, DGPS, /*GPS_PPS*/ IRTK, FRTK, DEAD_RECKONING, MANUAL, SIMULATED} GGAFixData_t;
+typedef enum {INVALID = 0, GPS_FIX, DGPS, IRTK, FRTK, DEAD_RECKONING, MANUAL, SIMULATED} GGAFixData_t;
 
 //! GGA data Structure
 typedef struct{
@@ -89,29 +89,36 @@ typedef struct{
     char mode[2];                           //! Mode
     char fix[2];                            //! Fix
     int8_t sats[13];                        //! Satellites
-    char pdop[4];                           //! PDOP
-    char hdop[4];                           //! HDOP                    
-    char vdop[4];                           //! VDOP
+    char pdop[6];                           //! PDOP
+    char hdop[6];                           //! HDOP                    
+    char vdop[6];                           //! VDOP
 } GpsGSAData_t;
 
 //! Satellite data Structure
 typedef struct {
     char id[4];                             //! Satellite ID
-    char elevation[3];                      //! Elevation
-    char azimuth[3];                        //! Azimuth
-    char snr[4];                            //! SNR
+    char elevation[5];                      //! Elevation
+    char azimuth[5];                        //! Azimuth
+    char snr[5];                            //! SNR
 } SatData_t;
 
-//! GSV data Structure
+//! GPGSV data Structure
 typedef struct{
     char satsInView[4];                     //! Satellites in view
     SatData_t sats[30];                     //! Satellites
-} GpsGSVData_t;
+} GpsGPGSVData_t;
+
+//! GPGSV data Structure
+typedef struct{
+    char satsInView[4];                     //! Satellites in view
+    SatData_t sats[30];                     //! Satellites
+} GpsGLGSVData_t;
+
 
 //! VTG data Structure
 typedef struct{
     char course[8];                         //! Course
-    char courseM[2];                        //! Reference
+    char courseM[5];                        //! Reference
     char speedK[8];                         //! Speed in knots
     
     char speed[8];                          //! Speed in km/h                                   SI
@@ -136,7 +143,8 @@ void getGpsData(int* sats, float* speed, float* altitude, float* hdop);
 GpsGGAData_t* getGGAData(void);
 GpsRMCData_t* getRMCData(void);
 GpsGSAData_t* getGSAData(void);
-GpsGSVData_t* getGSVData(void);
+GpsGPGSVData_t* getGPGSVData(void);
+GpsGLGSVData_t* getGLGSVData(void);
 GpsVTGData_t* getVTGData(void);
 
 /*! @} */ //End of GPS_Module
