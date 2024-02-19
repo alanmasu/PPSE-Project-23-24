@@ -15,19 +15,22 @@
   #endif
 #endif
 
+long intervallo = 10000;
+
 const int maxDataLenght = 600;
+long lastPrintInstant = 0;
 
 void setup(){
 
   Serial2.setRX(GPS_RX);
   Serial2.setTX(GPS_TX);
+  Serial2.begin(9600);
   pinMode(GPS_EN,OUTPUT);
 
   #ifdef DEBUG
     Serial1.begin(115200) ;
   #else
-    //Serial.begin(115200) ;
-    Serial2.begin(9600);
+    Serial.begin(115200) ;
     while(!Serial);
   #endif
   
@@ -35,7 +38,7 @@ void setup(){
 
 }
 
-void loop(){
+void loop(){  
 
   String infoGPS[12];
   char *sentence;
@@ -44,24 +47,29 @@ void loop(){
   // String buffer[M];
 
   //PRINTF("%d",Serial2.available());
-  //Controllo se ci sono caratteri
-  while(Serial2.available()>0){
-    //Pacchetto stringhe da passare
-    for(int i=0;i<12;++i){
-      String sentence = Serial2.readStringUntil('\n');
-      //PRINTF("%s",sentence);
-      infoGPS[i]=sentence;
+
+    //Controllo se ci sono caratteri
+    while(Serial2.available()>0){
+      //Pacchetto stringhe da passare
+      for(int i=0;i<12;++i){
+        String sentence = Serial2.readStringUntil('\n');
+        //PRINTF("%s",sentence);
+        infoGPS[i]=sentence;
+      }
     }
-  }
 
-  PRINTF("\n\nINIZIO PARSING VARIE STRINGHE\n");
+  
 
-  for(int i=0;i<12;++i){
-    PRINTF("\nParsing...");
-    gpsParseData(infoGPS[i].c_str());
-    PRINTF("\nOK...\n");
+  if(millis()- lastPrintInstant > intervallo){
+    for(int i=0;i<12;++i){
+      PRINTF("\nParsing...");
+      gpsParseData(infoGPS[i].c_str());
+      PRINTF("\nOK...\n");
+    }
+    lastPrintInstant = millis();
   }
-  PRINTF("\nFine ciclo\n\n");
+  
+
 
   // PRINTF("\nParsing...");
   //gpsParseData(sentence);

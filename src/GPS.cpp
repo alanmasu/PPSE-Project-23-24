@@ -218,7 +218,7 @@ void gpsParseData(const char* packet){
             //PRINTF("nextSentence after: %p\n", nextSentence);
             //PRINTF("%s\n",  str);
             PRINTF("\nValid: %d\n", valid);
-            PRINTF("\n\nSENTENCE %d\n\n",se);
+            //PRINTF("\n\nSENTENCE \n\n",se);
             if(valid){
                 //PRINTF("str: %s\n", str);
                 str = splitString(str, '*', 0);
@@ -259,7 +259,7 @@ void gpsParseData(const char* packet){
                     strcpy(gpsGGAData.altitude, fields[8].c_str());
                     //Altitude WSG84
                     strcpy(gpsGGAData.altitude_WSG84, fields[10].c_str());
-
+                    PRINTF("\nSENTENCE GGA\n");
                     PRINTF("%lld\t (%s,%s) \tFix:%d \tsats:%s \thdop:%s \talt:%s \taltGeo:%s\n\n", gpsGGAData.time,
                                                                                             gpsGGAData.latitude,
                                                                                             gpsGGAData.longitude,
@@ -290,7 +290,7 @@ void gpsParseData(const char* packet){
                     gpsRMCData.timeInfo = getDateFromString(fields[0].c_str(), fields[8].c_str());
                     //Others
                     strcpy(gpsRMCData.others, fields[9].c_str());
-
+                    PRINTF("\nSENTENCE RMC\n");
                     PRINTF("(%s,\t%s) \tValid:%d \tspeed:%s \tcourse:%s \tdate:%d/%d/%d %d:%d:%d \tothers:%s\n\n",   gpsRMCData.latitude,
                                                                                                             gpsRMCData.longitude,
                                                                                                             gpsRMCData.valid,
@@ -324,7 +324,7 @@ void gpsParseData(const char* packet){
                     strcpy(gpsGSAData.hdop, fields[i+1].c_str());
                     //VDOP
                     strcpy(gpsGSAData.vdop, fields[i+2].c_str());
-
+                    PRINTF("\nSENTENCE GSA\n");
                     PRINTF("Mode:%s \tFix:%s \tPDOP:%s \tHDOP:%s \tVDOP:%s\n",  gpsGSAData.mode,
                                                                                     gpsGSAData.fix,
                                                                                     gpsGSAData.pdop,
@@ -357,6 +357,7 @@ void gpsParseData(const char* packet){
                             //if(fields[f + 3].charAt(0) == 0) break;
                         strcpy(gpsGLGSVData.sats[i].snr, fields[f+3].c_str());
                     }
+                    PRINTF("\nSENTENCE GLGVS\n");
                     if(mgsIndex == 1){
                         PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
                     }
@@ -389,6 +390,7 @@ void gpsParseData(const char* packet){
                             //if(fields[f + 3].charAt(0) == 0) break;
                         strcpy(gpsGPGSVData.sats[i].snr, fields[f+3].c_str());
                     }
+                    PRINTF("\nSENTENCE GPGVS\n");                    
                     if(mgsIndex == 1){
                         PRINTF("Satellites in view: %s\n", /* gpsGSVData.satsInView*/ fields[2].c_str());
                     }
@@ -400,7 +402,7 @@ void gpsParseData(const char* packet){
                         PRINTF("\t\tSNR: %s\n", gpsGPGSVData.sats[i].snr);
                     }
                 }else if(sentenceType == GLL_SENTENCE){     //VUOTA
-                    PRINTF("NON LA STAMPIAMO");
+                    PRINTF("\nSENTENCE GLL\n");
                 }else if(sentenceType == VTG_SENTENCE){
                     //Course
                     strcpy(gpsVTGData.course, fields[0].c_str());
@@ -410,7 +412,7 @@ void gpsParseData(const char* packet){
                     strcpy(gpsVTGData.speedK, fields[4].c_str());
                     //Speed in km/h
                     strcpy(gpsVTGData.speed, fields[6].c_str());
-
+                    PRINTF("\nSENTENCE VGT\n");
                     PRINTF("Course:%s \tReference:%s \tSpeed in knots:%s \tSpeed in km/h:%s\n\n", gpsVTGData.course,
                                                                                                 gpsVTGData.courseM,
                                                                                                 gpsVTGData.speedK,
