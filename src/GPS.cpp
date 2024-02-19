@@ -217,7 +217,7 @@ void gpsParseData(const char* packet){
             bool valid = nmeaChecksumValidate(nextSentence, &nextSentence);
             //PRINTF("nextSentence after: %p\n", nextSentence);
             //PRINTF("%s\n",  str);
-            //PRINTF("\nValid: %d\n", valid);
+            PRINTF("\nValid: %d\n", valid);
             PRINTF("\n\nSENTENCE %d\n\n",se);
             if(valid){
                 //PRINTF("str: %s\n", str);
