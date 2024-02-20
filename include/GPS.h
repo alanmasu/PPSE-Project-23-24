@@ -60,13 +60,13 @@ typedef enum {INVALID = 0, GPS_FIX, DGPS, IRTK, FRTK, DEAD_RECKONING, MANUAL, SI
 
 //! GGA data Structure
 typedef struct{
-    time_t time;                            //! Time                                            SI
-    char latitude[12];                      //! Latitude                                        SI
-    char longitude[12];                     //! Longitude                                       SI
-    GGAFixData_t fix;                       //! Fix                                             SI        
-    char sats[4];                           //! Satellites                                      SI
-    char hdop[6];                           //! HDOP                                            SI
-    char altitude[8];                       //! Altitude                                        SI
+    time_t time;                            //! Time                                            
+    char latitude[12];                      //! Latitude                                        
+    char longitude[12];                     //! Longitude                                       
+    GGAFixData_t fix;                       //! Fix                                                     
+    char sats[4];                           //! Satellites                                      
+    char hdop[6];                           //! HDOP                                            
+    char altitude[8];                       //! Altitude                                        
     char altitude_WSG84[8];                 //! Geoid altitude on WSG84 reference               
 } GpsGGAData_t;
 
@@ -77,10 +77,10 @@ typedef struct{
     char longitude[12];                     //! Longitude
     char altitude[8];                       //! Altitude
     
-    char speed[8];                          //! Speed in knots                                  SI
-    char course[8];                         //! Course                                          SI
+    char speed[8];                          //! Speed in knots                                  
+    char course[8];                         //! Course                                          
     
-    struct tm timeInfo;                     //! Time info
+    struct tm timeInfo;                     //! Time info                                       
     char others[6];                         //! Others fields
 } GpsRMCData_t;
 
@@ -121,7 +121,7 @@ typedef struct{
     char courseM[5];                        //! Reference
     char speedK[8];                         //! Speed in knots
     
-    char speed[8];                          //! Speed in km/h                                   SI
+    char speed[8];                          //! Speed in km/h                                   
 } GpsVTGData_t;
 
 

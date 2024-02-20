@@ -67,15 +67,12 @@ void loop(){
     digitalWrite(ALIVE_LED,!digitalRead(ALIVE_LED));
     PRINTF("\nParsing...");
     gpsParseData(infoGPS.c_str());
+ 
     infoGPS = "";
     PRINTF("\nOK...\n");
     lastPrintInstant = millis();
   }
   
-
-
-  // PRINTF("\nParsing...");
-  //gpsParseData(sentence);
-  // PRINTF("OK...\n");
+  
 
 }
