@@ -1,0 +1,6 @@
+.program blink_led
+
+loop:
+    pull
+    out pins, 1
+    jmp loop
