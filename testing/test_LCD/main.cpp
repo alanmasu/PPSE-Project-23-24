@@ -1,3 +1,8 @@
+#include <Arduino.h>
+#include <Wire.h>
+#include <PSEBoard.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "LCD.h"
 
 #ifndef PRINTF 
@@ -83,6 +88,7 @@ int x=0;
 int y=0;
 double angle = 90.0;
 double anglerad = 0;
+int ragg = 8;
 
 double getrad(double angle){
     return (angle*3.14)/180.0;
@@ -326,8 +332,7 @@ void loop() {
                         //Cerchio che si muove
 
                             //Cerchio base
-                            display.drawCircle(x_f,y_f,12,WHITE);
-
+                            display.drawCircle(x_f, y_f, 12, WHITE);
                             
                             //Cerchio che deve muoversi
                             
@@ -340,16 +345,17 @@ void loop() {
                         
 
                         uint16_t tr = millis() - t4;
-                        if(tr < 1000) {
+                        if(tr < 2000) {
+                            
                             anglerad=getrad(angle);
-                            x = cerchiX(12,anglerad);
-                            y = cerchiY(12,anglerad);
+                            x = cerchiX(ragg,anglerad);
+                            y = cerchiY(ragg,anglerad);
 
                             display.fillCircle(x,y,3,WHITE);
 
-                        }else if(1000 < tr && tr < 2000) {
                             angle = angle +10;
-                        }else if(2000 < tr){
+                        }
+                        else if(2002 < tr){
                             t4 = millis();
                         }
 
