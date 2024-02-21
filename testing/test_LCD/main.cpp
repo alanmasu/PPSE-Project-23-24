@@ -28,6 +28,8 @@ int valBottoneR = 0;
 int valBottoneL = 0;
 int valBottoneD = 0;
 int valBottoneU = 0;
+bool updatePage = false;
+
 
 int nscheda = 0;
 int nschedaCAL = 0;
@@ -103,11 +105,13 @@ void loop() {
     float vTempSensor;
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
         nscheda++;
+        updatePage = true;
         if(nscheda>6){
             nscheda=6;
         }
     }else if(!digitalRead(BTN_LEFT) != valBottoneL && !digitalRead(BTN_LEFT)){
         nscheda--;
+        updatePage = true;
         if(nscheda<0){
             nscheda=0;
         }
@@ -117,17 +121,14 @@ void loop() {
     valBottoneL = !digitalRead(BTN_LEFT); 
 
     Serial.printf("\n%d", nscheda);
-
-    switch (nscheda){
-        case 0:
-            generarePagINTRO();
-            break;
-        case 1:
-            
-            
-
-            //CORPO
-
+    if(millis() - t3 > 1000 || updatePage){
+        updatePage = false;
+        t3= millis();
+        switch (nscheda){
+            case 0:
+                generarePagINTRO();
+                break;
+            case 1:
                 //CAMBIARE PAGINA
                 if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
                     nschedaCAL++;
@@ -142,59 +143,58 @@ void loop() {
                     generarePagCAL1();
                 }
                 valBottoneD = !digitalRead(BTN_DOWN); 
-            break;
-        
-        case 2:
+                break;
             
-            
-            if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
-                nschedaSTART++;
-                if(nschedaSTART>2){
-                    nschedaSTART=2;
+            case 2:
+                if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
+                    nschedaSTART++;
+                    if(nschedaSTART>2){
+                        nschedaSTART=2;
+                    }
                 }
-            }
 
-            if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
-                nschedaSTART--;
-                if(nschedaSTART<0){
-                    nschedaSTART=0;
+                if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
+                    nschedaSTART--;
+                    if(nschedaSTART<0){
+                        nschedaSTART=0;
+                    }
                 }
-            }
 
-            switch (nschedaSTART){
-                case 0:
-                    generarePagSTART();
-                    break;
-                case 1:                   
-                    generarePagREADY();
-                    break;
+                switch (nschedaSTART){
+                    case 0:
+                        generarePagSTART();
+                        break;
+                    case 1:                   
+                        generarePagREADY();
+                        break;
+                    
+                    case 2:
+                        generarePagFIND(90.0);
+                        break;
+                }
                 
-                case 2:
-                    generarePagFIND(90.0);
-                    break;
-            }
-            
-            valBottoneD = !digitalRead(BTN_DOWN);
-            valBottoneU = !digitalRead(BTN_UP);
-            break;
-        case 3:
-            generarePagTIME();
-            break;
-        case 4:
-            generarePagWIFI();
-            break;
-        case 5:
-            analog = analogRead(TEMP_SENSOR);
-            vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
-            data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
+                valBottoneD = !digitalRead(BTN_DOWN);
+                valBottoneU = !digitalRead(BTN_UP);
+                break;
+            case 3:
+                generarePagTIME();
+                break;
+            case 4:
+                generarePagWIFI();
+                break;
+            case 5:
+                analog = analogRead(TEMP_SENSOR);
+                vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
+                data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
 
-            //Get the CPU temperature
-            data.cpuTemp = analogReadTemp();
-            generarePagTEMP(data.temp, data.cpuTemp);
-            break;
-        case 6:
-            generarePagGPS();
-            break;        
+                //Get the CPU temperature
+                data.cpuTemp = analogReadTemp();
+                generarePagTEMP(data.temp, data.cpuTemp);
+                break;
+            case 6:
+                generarePagGPS();
+                break;        
+        }
     }
 
     uint16_t dt = millis() - t0;
