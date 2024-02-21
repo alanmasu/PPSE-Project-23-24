@@ -12,7 +12,59 @@
   #endif
 #endif
 
+//BUSSOLA
+const unsigned char bussola [] PROGMEM = {
+	// 'bussola, 34x34px
+	0x00, 0x07, 0xf8, 0x00, 0x00, 0x00, 0x3e, 0x1f, 0x00, 0x00, 0x00, 0xe0, 0x01, 0xc0, 0x00, 0x01, 
+	0x80, 0xc0, 0x60, 0x00, 0x07, 0x00, 0xc0, 0x38, 0x00, 0x0c, 0x00, 0xc0, 0x0c, 0x00, 0x08, 0x00, 
+	0xc0, 0x04, 0x00, 0x18, 0x00, 0xc0, 0x06, 0x00, 0x30, 0x00, 0x00, 0x43, 0x00, 0x20, 0x00, 0x01, 
+	0x81, 0x00, 0x60, 0x00, 0x07, 0x81, 0x80, 0x40, 0x00, 0x1f, 0x00, 0x80, 0x40, 0x00, 0x7f, 0x00, 
+	0x80, 0xc0, 0x00, 0xfe, 0x00, 0xc0, 0xc0, 0x01, 0xfe, 0x00, 0xc0, 0x80, 0x03, 0xfc, 0x00, 0x40, 
+	0x9f, 0x06, 0xfc, 0x3e, 0x40, 0x9f, 0x0c, 0x78, 0x3e, 0x40, 0x80, 0x0c, 0x30, 0x00, 0x40, 0xc0, 
+	0x18, 0x60, 0x00, 0xc0, 0xc0, 0x10, 0xc0, 0x00, 0xc0, 0x40, 0x33, 0x80, 0x00, 0x80, 0x40, 0x2e, 
+	0x00, 0x00, 0x80, 0x60, 0x78, 0x00, 0x01, 0x80, 0x20, 0x60, 0x00, 0x01, 0x00, 0x30, 0x80, 0x00, 
+	0x03, 0x00, 0x18, 0x00, 0xc0, 0x06, 0x00, 0x08, 0x00, 0xc0, 0x04, 0x00, 0x0c, 0x00, 0xc0, 0x0c, 
+	0x00, 0x07, 0x00, 0xc0, 0x38, 0x00, 0x01, 0x80, 0xc0, 0x60, 0x00, 0x00, 0xe0, 0x01, 0xc0, 0x00, 
+	0x00, 0x3e, 0x1f, 0x00, 0x00, 0x00, 0x07, 0xf8, 0x00, 0x00
+};
+const unsigned char bussolaCanc [] PROGMEM = {
+	// 'bussola, 34x34px
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
 
+// 'arrow', 40x30px
+unsigned char arrow [] PROGMEM = {
+	0xc0, 0x00, 0x00, 0x0c, 0xf0, 0x00, 0x00, 0x3c, 0x7c, 0x00, 0x00, 0xf8, 0x3f, 0x00, 0x03, 0xf0, 
+	0x33, 0x80, 0x07, 0x30, 0x18, 0xe0, 0x1c, 0x60, 0x18, 0x38, 0x78, 0x60, 0x0c, 0x1f, 0xe0, 0xc0, 
+	0x06, 0x07, 0x81, 0x80, 0x06, 0x00, 0x01, 0x80, 0x03, 0x00, 0x03, 0x00, 0x03, 0x80, 0x03, 0x00, 
+	0x01, 0x80, 0x06, 0x00, 0x00, 0xc0, 0x04, 0x00, 0x00, 0xc0, 0x0c, 0x00, 0x00, 0x60, 0x18, 0x00, 
+	0x00, 0x60, 0x18, 0x00, 0x00, 0x30, 0x30, 0x00, 0x00, 0x38, 0x70, 0x00, 0x00, 0x18, 0x60, 0x00, 
+	0x00, 0x0c, 0xc0, 0x00, 0x00, 0x0c, 0xc0, 0x00, 0x00, 0x07, 0x80, 0x00, 0x00, 0x07, 0x80, 0x00, 
+	0x00, 0x03, 0x00, 0x00
+};
+
+const unsigned char term [] PROGMEM = {
+	// 'term, 30x35px
+	0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x80, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x09, 0xc0, 0x00, 
+	0x00, 0x08, 0x40, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x09, 0xc0, 0x00, 0x00, 0x08, 0x40, 0x00, 
+	0x00, 0x08, 0xc0, 0x00, 0x00, 0x09, 0xc0, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x09, 0xc0, 0x00, 
+	0x00, 0x08, 0x40, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x08, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 
+	0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 
+	0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 
+	0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x0b, 0x40, 0x00, 0x00, 0x1b, 0x60, 0x00, 
+	0x00, 0x17, 0xa0, 0x00, 0x00, 0x17, 0xa0, 0x00, 0x00, 0x17, 0xa0, 0x00, 0x00, 0x17, 0xa0, 0x00, 
+	0x00, 0x13, 0x20, 0x00, 0x00, 0x0c, 0xc0, 0x00, 0x00, 0x07, 0x80, 0x00
+};
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -42,6 +94,7 @@ SensorData data;
 int valBottoneR = 0;
 int valBottoneL = 0;
 int valBottoneD = 0;
+int valBottoneU = 0;
 
 int nscheda = 0;
 int nschedaCAL = 0;
@@ -115,6 +168,8 @@ void setup() {
 
 }
 
+
+
 void loop() {
 
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
@@ -159,7 +214,9 @@ void loop() {
                 display.println("Press RIGHT...");
                 display.display();
                 break;
+            
             case 1:
+                
                 display.clearDisplay();
 
                 //CORPO
@@ -173,8 +230,9 @@ void loop() {
                     }
             
                     if(nschedaCAL==1){                    
+                        
                         //TITOLO
-                        display.setCursor(46,0);  
+                        display.setCursor(48,0);  
                         display.setTextSize(2);
                         display.print("CAL"); 
 
@@ -190,13 +248,24 @@ void loop() {
 
                         //CORPO
 
-                        display.setTextSize(2);
-                        display.println("\nCALIBRATING ......");
+                        uint16_t tb = millis() - t3;
+                        if(tb < 1000) {
+                            display.drawBitmap(45,18,bussola,35,35,WHITE);
+                        }else if(1000 < tb && tb < 2000) {
+                           display.drawBitmap(45,18,bussolaCanc,34,34,WHITE);
+                        }else if(2000 < tb){
+                            t3 = millis();
+                        }
+
+                        display.setCursor(0,57); 
+                        display.setTextSize(1);
+                        display.println("Calibration...");
+                       
 
                             
                     }else{
                         //TITOLO
-                        display.setCursor(46,0);  
+                        display.setCursor(45,0);  
                         display.setTextSize(2);
                         display.print("CAL"); 
 
@@ -209,47 +278,141 @@ void loop() {
                         display.drawTriangle(111,6,97,1,97,11,WHITE);
                         display.setCursor(116,0); 
                         display.write("3\n");
+
+                        //CORPO
+
+                        display.drawBitmap(45,18,bussola,35,35,WHITE);
+                        
+                        display.setCursor(0,57); 
+                        display.setTextSize(1);
+                        display.println("DOWN to calibrate...");
+                        
+
                     }
+
                     valBottoneD = !digitalRead(BTN_DOWN); 
 
                 display.display();
 
                 break;
+            
             case 2:
+                
                 display.clearDisplay();
                 
-                
-                //FRECCIA DI SINISTRA
-                display.setTextSize(2);
-                display.drawTriangle(15,6,28,1,28,11,WHITE);
-                display.setCursor(1,0); 
-                display.write("2");
-                
-                //FRECCIA DI DESTRA
-                display.drawTriangle(111,6,97,1,97,11,WHITE);
-                display.setCursor(116,0); 
-                display.write("4\n");
+                if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
+                    nschedaSTART++;
+                    if(nschedaSTART>2){
+                        nschedaSTART=2;
+                    }
+                }
 
-                //TITOLO
-                display.setCursor(35,0);   
-                display.setTextSize(2);
-                display.println("START");   
+                if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
+                    nschedaSTART--;
+                    if(nschedaSTART<0){
+                        nschedaSTART=0;
+                    }
+                }
 
+                switch (nschedaSTART){
+                    case 0:
 
-                //CORPO
+                        //FRECCIA DI SINISTRA
+                        display.setTextSize(2);
+                        display.drawTriangle(15,6,28,1,28,11,WHITE);
+                        display.setCursor(1,0); 
+                        display.write("2");
+                        
+                        //FRECCIA DI DESTRA
+                        display.drawTriangle(111,6,97,1,97,11,WHITE);
+                        display.setCursor(116,0); 
+                        display.write("4\n");
 
-                display.setTextSize(1);
-                display.println("How to play:\n");
-                display.println("RIGHT : Swipe right");
+                        //TITOLO
+                        display.setCursor(35,0);   
+                        display.setTextSize(2);
+                        display.println("START");
 
+                        //CORPO
+
+                        display.setTextSize(1);
+                        display.println("Once you calibrate");
+                        display.println("the device we can");
+                        display.println("start to have fun\n");
+                        display.println("Press DOWN to save a WayPoint");
+
+                            
+                        
                     
-                display.println("LEFT : Swipe left");
-                display.println("UP : Delete Waypoint");
+                        break;
                     
-                display.println("DOWN : Save Waypoint");
+                    case 1: 
+
+                        //FRECCIA DI SINISTRA
+                        display.setTextSize(2);
+                        display.drawTriangle(15,6,28,1,28,11,WHITE);
+                        display.setCursor(1,0); 
+                        display.write("2");
+                        
+                        //FRECCIA DI DESTRA
+                        display.drawTriangle(111,6,97,1,97,11,WHITE);
+                        display.setCursor(116,0); 
+                        display.write("4\n");
+
+                        //TITOLO
+                        display.setCursor(32,0);   
+                        display.setTextSize(2);
+                        display.println("BHO");
+                        
+                        //CORPO
+                        display.setTextSize(1);
+                        display.println("UP : delete WayPoint");
+
+                        display.setCursor(0,55);
+                        display.println("DOWN : find WayPoint");
+    
+                        
+
+                        break;
+                    
+                    case 2:
+
+                        //FRECCIA DI SINISTRA
+                        display.setTextSize(2);
+                        display.drawTriangle(15,6,28,1,28,11,WHITE);
+                        display.setCursor(1,0); 
+                        display.write("2");
+                        
+                        //FRECCIA DI DESTRA
+                        display.drawTriangle(111,6,97,1,97,11,WHITE);
+                        display.setCursor(116,0); 
+                        display.write("4\n");
+
+                        //TITOLO
+                        display.setCursor(40,0);   
+                        display.setTextSize(2);
+                        display.println("FIND");
+
+
+                        //CORPO
+
+                        display.drawBitmap(49,22,arrow,30,25,WHITE);
+                    
+
+                        display.setTextSize(1);
+                        display.setCursor(0,55);
+                        display.println("UP : exit find page");
+        
+                        break;
+
+                }
+                
+                valBottoneD = !digitalRead(BTN_DOWN);
+                valBottoneU = !digitalRead(BTN_UP);
+                
                 display.display();
-                
                 break;
+
             case 3:
                 display.clearDisplay();
             
@@ -357,22 +520,7 @@ void loop() {
                     display.write("7\n");
 
                     //DISEGNO TERMOMETRO
-                    display.drawRect(1,25,25,35,WHITE);
-                    display.drawRect(3,29,4,29,WHITE);
-                    display.drawRect(4,35,2,23,WHITE);
-                    display.setTextSize(1);
-                    
-                    display.setCursor(13,29);
-                    display.print("20");  
-                    display.drawLine(9,37,25,37,WHITE);
-                    
-                    display.setCursor(13,39);
-                    display.print("10");  
-                    display.drawLine(9,47,25,47,WHITE);
-                    
-                    display.setCursor(19,49);
-                    display.print("0");  
-                    display.drawLine(9,57,25,57,WHITE);
+                    display.drawBitmap(1,25,term,30,35,WHITE);
 
                     //DATI
 
@@ -386,7 +534,7 @@ void loop() {
                     
                     display.setCursor(30,50);
                     display.print("CPU : ");
-                    display.setCursor(63,50);;
+                    display.setCursor(63,50);
                     display.print(CPUTempString);
                     display.setCursor(93,50);;
                     display.println(" C\n");
