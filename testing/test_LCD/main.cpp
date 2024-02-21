@@ -41,8 +41,11 @@ SensorData data;
 
 int valBottoneR = 0;
 int valBottoneL = 0;
+int valBottoneD = 0;
 
 int nscheda = 0;
+int nschedaCAL = 0;
+int nschedaSTART = 0;
 
 //Disegno triangoli senza numeri con posizioni giuste
     // display.drawTriangle(2,6,15,1,15,11,WHITE);
@@ -58,6 +61,7 @@ void setup() {
     pinMode(BTN_UP, INPUT);
     pinMode(BTN_RIGHT,INPUT);
     pinMode(BTN_LEFT,INPUT);
+    pinMode(BTN_DOWN,INPUT);
 
     delay(10);
 
@@ -158,33 +162,65 @@ void loop() {
             case 1:
                 display.clearDisplay();
 
-                //TITOLO
-                display.setCursor(40,0);  
-                display.setTextSize(2);
-                display.print("CAL"); 
-
-                //FRECCIA DI SINISTRA
-                display.drawTriangle(15,6,28,1,28,11,WHITE);
-                display.setCursor(1,0); 
-                display.write("1\n");
-
-                //FRECCIA DI DESTRA
-                display.drawTriangle(111,6,97,1,97,11,WHITE);
-                display.setCursor(116,0); 
-                display.write("3\n");
-
                 //CORPO
 
+                    //CAMBIARE PAGINA
+                    if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
+                        nschedaCAL++;
+                        if(nschedaCAL>1){
+                            nschedaCAL=1;
+                        }
+                    }
+            
+                    if(nschedaCAL==1){                    
+                        //TITOLO
+                        display.setCursor(46,0);  
+                        display.setTextSize(2);
+                        display.print("CAL"); 
+
+                        //FRECCIA DI SINISTRA
+                        display.drawTriangle(15,6,28,1,28,11,WHITE);
+                        display.setCursor(1,0); 
+                        display.write("1\n");
+
+                        //FRECCIA DI DESTRA
+                        display.drawTriangle(111,6,97,1,97,11,WHITE);
+                        display.setCursor(116,0); 
+                        display.write("3\n");
+
+                        //CORPO
+
+                        display.setTextSize(2);
+                        display.println("\nCALIBRATING ......");
+
+                            
+                    }else{
+                        //TITOLO
+                        display.setCursor(46,0);  
+                        display.setTextSize(2);
+                        display.print("CAL"); 
+
+                        //FRECCIA DI SINISTRA
+                        display.drawTriangle(15,6,28,1,28,11,WHITE);
+                        display.setCursor(1,0); 
+                        display.write("1\n");
+
+                        //FRECCIA DI DESTRA
+                        display.drawTriangle(111,6,97,1,97,11,WHITE);
+                        display.setCursor(116,0); 
+                        display.write("3\n");
+                    }
+                    valBottoneD = !digitalRead(BTN_DOWN); 
 
                 display.display();
+
                 break;
             case 2:
                 display.clearDisplay();
-                display.setCursor(37,0);   
-                display.setTextSize(1);
-                display.setTextSize(2);
+                
                 
                 //FRECCIA DI SINISTRA
+                display.setTextSize(2);
                 display.drawTriangle(15,6,28,1,28,11,WHITE);
                 display.setCursor(1,0); 
                 display.write("2");
