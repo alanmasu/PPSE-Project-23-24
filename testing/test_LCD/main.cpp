@@ -3,7 +3,7 @@
 #include <PSEBoard.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "LCD.h"
+#include <LCD.h>
 
 #ifndef PRINTF 
   #ifdef DEBUG
@@ -13,10 +13,32 @@
   #endif
 #endif
 
+typedef struct {
+  float cpuTemp;
+  float temp;
+} SensorData;
+
+SensorData data;
 
 //Disegno triangoli senza numeri con posizioni giuste
     // display.drawTriangle(2,6,15,1,15,11,WHITE);
     // display.drawTriangle(127,6,113,1,113,11,WHITE);
+
+int valBottoneR = 0;
+int valBottoneL = 0;
+int valBottoneD = 0;
+int valBottoneU = 0;
+
+int nscheda = 0;
+int nschedaCAL = 0;
+int nschedaSTART = 0;
+
+//Timers 
+uint64_t t0 = 0;
+uint64_t t1 = 0;
+uint64_t t2 = 0;  //Timer for UART
+uint64_t t3 = 0;  //Timer for LCD
+uint64_t t4 = 0;
 
 void setup() {
 
@@ -60,16 +82,10 @@ void setup() {
     Wire.setSDA(I2C0_SDA);
     Wire.setSCL(I2C0_SCL);
 
-    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    if(!lcdInit(SCREEN_ADDRESS)){
         Serial.println(F("SSD1306 allocation failed"));
     }
-    // Clear the buffer
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);        // Draw white text
-    display.setCursor(40,30);             
-    display.println("Hello PSE!");
-    display.display();
+    delay(2000);
 
     //Initialize the ESP01 pins
     pinMode(ESP_EN, OUTPUT);
@@ -82,32 +98,9 @@ void setup() {
 
 }
 
-int x_f = 64;
-int y_f = 32;
-int x=0;
-int y=0;
-double angle = 90.0;
-double anglerad = 0;
-int ragg = 8;
-
-double getrad(double angle){
-    return (angle*3.14)/180.0;
-}
-
-int cerchiX(int ragg,double anglerad){
-    int x = 64 + ragg * cos(anglerad);
-    return x;
-}
-
-int cerchiY(int ragg,double anglerad){
-    int y = 32 + ragg * sin(anglerad);
-    return y;
-}
-
-
-
 void loop() {
-
+    int analog;
+    float vTempSensor;
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
         nscheda++;
         if(nscheda>6){
@@ -125,413 +118,83 @@ void loop() {
 
     Serial.printf("\n%d", nscheda);
 
-        switch (nscheda){
-            case 0:
-                
-                display.clearDisplay();
-                
-                display.setTextSize(2);
+    switch (nscheda){
+        case 0:
+            generarePagINTRO();
+            break;
+        case 1:
             
-                //FRECCIA DI DESTRA
-                display.drawTriangle(111,6,97,1,97,11,WHITE);
-                display.setCursor(116,0); 
-                display.write("2\n");
-
-                //TITOLO
-                display.setCursor(35,0);   
-                display.println("INTRO");          
-
-                //CORPO
-                display.setTextSize(1);
-                display.println("Welcome to our game.");
-                display.println("Have fun monitoring ");
-                display.println("the data and remember to save a WayPoint");
-                display.println("along the way");
-                display.println("Press RIGHT...");
-                display.display();
-                break;
             
-            case 1:
-                
-                display.clearDisplay();
 
-                //CORPO
+            //CORPO
 
-                    //CAMBIARE PAGINA
-                    if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
-                        nschedaCAL++;
-                        if(nschedaCAL>1){
-                            nschedaCAL=1;
-                        }
-                    }
-            
-                    if(nschedaCAL==1){                    
-                        
-                        //TITOLO
-                        display.setCursor(48,0);  
-                        display.setTextSize(2);
-                        display.print("CAL"); 
-
-                        //FRECCIA DI SINISTRA
-                        display.drawTriangle(15,6,28,1,28,11,WHITE);
-                        display.setCursor(1,0); 
-                        display.write("1\n");
-
-                        //FRECCIA DI DESTRA
-                        display.drawTriangle(111,6,97,1,97,11,WHITE);
-                        display.setCursor(116,0); 
-                        display.write("3\n");
-
-                        //CORPO
-
-                        uint16_t tb = millis() - t3;
-                        if(tb < 1000) {
-                            display.drawBitmap(45,18,bussola,35,35,WHITE);
-                        }else if(1000 < tb && tb < 2000) {
-                           display.drawBitmap(45,18,bussolaCanc,34,34,WHITE);
-                        }else if(2000 < tb){
-                            t3 = millis();
-                        }
-
-                        display.setCursor(0,57); 
-                        display.setTextSize(1);
-                        display.println("Calibration...");
-                       
-
-                            
-                    }else{
-                        //TITOLO
-                        display.setCursor(45,0);  
-                        display.setTextSize(2);
-                        display.print("CAL"); 
-
-                        //FRECCIA DI SINISTRA
-                        display.drawTriangle(15,6,28,1,28,11,WHITE);
-                        display.setCursor(1,0); 
-                        display.write("1\n");
-
-                        //FRECCIA DI DESTRA
-                        display.drawTriangle(111,6,97,1,97,11,WHITE);
-                        display.setCursor(116,0); 
-                        display.write("3\n");
-
-                        //CORPO
-
-                        display.drawBitmap(45,18,bussola,35,35,WHITE);
-                        
-                        display.setCursor(0,57); 
-                        display.setTextSize(1);
-                        display.println("DOWN to calibrate...");
-                        
-
-                    }
-
-                    valBottoneD = !digitalRead(BTN_DOWN); 
-
-                display.display();
-
-                break;
-            
-            case 2:
-                
-                display.clearDisplay();
-                
+                //CAMBIARE PAGINA
                 if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
-                    nschedaSTART++;
-                    if(nschedaSTART>2){
-                        nschedaSTART=2;
+                    nschedaCAL++;
+                    if(nschedaCAL>1){
+                        nschedaCAL=1;
                     }
                 }
-
-                if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
-                    nschedaSTART--;
-                    if(nschedaSTART<0){
-                        nschedaSTART=0;
-                    }
-                }
-
-                switch (nschedaSTART){
-                    case 0:
-
-                        //FRECCIA DI SINISTRA
-                        display.setTextSize(2);
-                        display.drawTriangle(15,6,28,1,28,11,WHITE);
-                        display.setCursor(1,0); 
-                        display.write("2");
-                        
-                        //FRECCIA DI DESTRA
-                        display.drawTriangle(111,6,97,1,97,11,WHITE);
-                        display.setCursor(116,0); 
-                        display.write("4\n");
-
-                        //TITOLO
-                        display.setCursor(35,0);   
-                        display.setTextSize(2);
-                        display.println("START");
-
-                        //CORPO
-
-                        display.setTextSize(1);
-                        display.println("Once you calibrate");
-                        display.println("the device we can");
-                        display.println("start to have fun\n");
-                        display.println("Press DOWN to save a WayPoint");
-                    
-                        break;
-                    
-                    case 1: 
-
-                        //FRECCIA DI SINISTRA
-                        display.setTextSize(2);
-                        display.drawTriangle(15,6,28,1,28,11,WHITE);
-                        display.setCursor(1,0); 
-                        display.write("2");
-                        
-                        //FRECCIA DI DESTRA
-                        display.drawTriangle(111,6,97,1,97,11,WHITE);
-                        display.setCursor(116,0); 
-                        display.write("4\n");
-
-                        //TITOLO
-                        display.setCursor(32,0);   
-                        display.setTextSize(2);
-                        display.println("BHO");
-                        
-                        //CORPO
-                        display.setTextSize(1);
-                        display.println("UP : delete WayPoint");
-
-                        display.setCursor(0,55);
-                        display.println("DOWN : find WayPoint");
-    
-                        
-
-                        break;
-                    
-                    case 2:
-
-                        //FRECCIA DI SINISTRA
-                        display.setTextSize(2);
-                        display.drawTriangle(15,6,28,1,28,11,WHITE);
-                        display.setCursor(1,0); 
-                        display.write("2");
-                        
-                        //FRECCIA DI DESTRA
-                        display.drawTriangle(111,6,97,1,97,11,WHITE);
-                        display.setCursor(116,0); 
-                        display.write("4\n");
-
-                        //TITOLO
-                        display.setCursor(40,0);   
-                        display.setTextSize(2);
-                        display.println("FIND");
-
-
-                        //CORPO
-
-                        //Cerchio che si muove
-
-                            //Cerchio base
-                            display.drawCircle(x_f, y_f, 12, WHITE);
-                            
-                            //Cerchio che deve muoversi
-                            
-                            
-                            
-                        display.setTextSize(1);
-                        display.setCursor(0,55);
-                        display.println("UP : exit find page");
-
-                        
-
-                        uint16_t tr = millis() - t4;
-                        if(tr < 2000) {
-                            
-                            anglerad=getrad(angle);
-                            x = cerchiX(ragg,anglerad);
-                            y = cerchiY(ragg,anglerad);
-
-                            display.fillCircle(x,y,3,WHITE);
-
-                            angle = angle +10;
-                        }
-                        else if(2002 < tr){
-                            t4 = millis();
-                        }
-
-
-                        break;
-
-                }
-                
-                valBottoneD = !digitalRead(BTN_DOWN);
-                valBottoneU = !digitalRead(BTN_UP);
-                
-                display.display();
-                break;
-
-            case 3:
-                display.clearDisplay();
-            
-                //TITOLO
-                display.setCursor(40,0);  
-                display.setTextSize(2);
-                display.print("TIME");
-
-                //FRECCIA DI SINISTRA
-                display.drawTriangle(15,6,28,1,28,11,WHITE);
-                display.setCursor(1,0); 
-                display.write("3");
-                
-                //FRECCIA DI DESTRA
-                display.drawTriangle(111,6,97,1,97,11,WHITE);
-                display.setCursor(116,0); 
-                display.write("5\n");
-
-                //DISEGNO OROLOGIO
-                display.drawCircle(22,40,20,WHITE);
-                display.drawLine(22,40,13,36,WHITE);
-                display.drawLine(22,42,27,55,WHITE);
-                
-                display.drawLine(22,21,22,26,WHITE);
-                display.drawLine(22,60,22,55,WHITE);
-                
-                display.drawLine(2,40,7,40,WHITE);
-                display.drawLine(42,40,37,40,WHITE);
-
-                //DATA
-                display.setCursor(55,27); 
-                display.setTextSize(1);
-                display.print("20/02/2024");
-
-                //TEMPO
-                display.setCursor(55,47); 
-                display.setTextSize(1);
-                display.print("22:59:20");
-
-
-                display.display();
-                break;
-            case 4:
-                display.clearDisplay();
-
-                //TITOLO
-                display.setCursor(40,0); 
-                display.setTextSize(2);
-                display.println("WIFI");
-
-                //FRECCIA DI SINISTRA
-                display.drawTriangle(15,6,28,1,28,11,WHITE);
-                display.setCursor(1,0); 
-                display.write("4");
-                
-                //FRECCIA DI DESTRA
-                display.drawTriangle(111,6,97,1,97,11,WHITE);
-                display.setCursor(116,0); 
-                display.write("6\n");
-
-
-                //CORPO
-
-                display.setTextSize(1);
-                display.println("\nssid : 5948753498729754925795873902");
-                display.println("id : 5748.9384.8284.8394");
-                display.println("commit : kendjso");
-
-                display.display();
-                break;
-            case 5:
-
-                if(millis() - t1 > 1000) {
-
-                    int analog = analogRead(TEMP_SENSOR);
-                    float vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
-                    data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
-
-                    //Get the CPU temperature
-                    data.cpuTemp = analogReadTemp();
-            
-                    // Serial.printf("Analog read: %d,\tTEMP Voltage: %f,\tTemp: %f,\tCPU T: %f\n",analog, vTempSensor, data.temp, data.cpuTemp);
-            
-
-                    //Print the temperature to the OLED display
-                    String tempString = String(data.temp);
-                    String CPUTempString = String(data.cpuTemp);
-
-                    display.clearDisplay();
-
-                    //TITOLO
-                    display.setCursor(40,0);   
-                    display.setTextSize(2);
-                    display.print("TEMP");
-                    display.println("\n");
-
-                    //FRECCIA DI SINISTRA
-                    display.drawTriangle(15,6,28,1,28,11,WHITE);
-                    display.setCursor(1,0); 
-                    display.write("5");
-                
-                    //FRECCIA DI DESTRA
-                    display.drawTriangle(111,6,97,1,97,11,WHITE);
-                    display.setCursor(116,0); 
-                    display.write("7\n");
-
-                    //DISEGNO TERMOMETRO
-                    display.drawBitmap(1,25,term,30,35,WHITE);
-
-                    //DATI
-
-                    display.setTextSize(1);
-                    display.setCursor(30,30);;
-                    display.println("AMB : ");
-                    display.setCursor(63,30);;
-                    display.print(tempString);
-                    display.setCursor(93,30);;
-                    display.println(" C");
-                    
-                    display.setCursor(30,50);
-                    display.print("CPU : ");
-                    display.setCursor(63,50);
-                    display.print(CPUTempString);
-                    display.setCursor(93,50);;
-                    display.println(" C\n");
-                    display.display();
-                    
-                    t1 = millis();
-                }
-
-                break;
-            
-            case 6:
-                    display.clearDisplay();
-
-                    //TITOLO
-                    display.setCursor(46,0);   
-                    display.setTextSize(2);
-                    display.println("GPS\n"); 
-
-                    //FRECCIA DI SINISTRA
-                    display.drawTriangle(15,6,28,1,28,11,WHITE);
-                    display.setCursor(1,0); 
-                    display.write("6");
-                
-                //CORPO
-
-                    display.setTextSize(1);
-                    display.println("\n");
-                    display.println("Lat : 4563.6443");
-                    display.println("Lon : 4536.5643");
-                    display.println("Alt : 5434.5345");
-                    display.println("Sat : 07");
-                    display.println("Fix : 3");
-
-                
-                    display.display();
-
-                    break;
-            default:
-                    break;
         
+                if(nschedaCAL==1){                    
+                    generarePagCAL2();
+                }else{
+                    generarePagCAL1();
+                }
+                valBottoneD = !digitalRead(BTN_DOWN); 
+            break;
+        
+        case 2:
+            
+            
+            if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
+                nschedaSTART++;
+                if(nschedaSTART>2){
+                    nschedaSTART=2;
+                }
+            }
+
+            if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
+                nschedaSTART--;
+                if(nschedaSTART<0){
+                    nschedaSTART=0;
+                }
+            }
+
+            switch (nschedaSTART){
+                case 0:
+                    generarePagSTART();
+                    break;
+                case 1:                   
+                    generarePagREADY();
+                    break;
+                
+                case 2:
+                    generarePagFIND(90.0);
+                    break;
+            }
+            
+            valBottoneD = !digitalRead(BTN_DOWN);
+            valBottoneU = !digitalRead(BTN_UP);
+            break;
+        case 3:
+            generarePagTIME();
+            break;
+        case 4:
+            generarePagWIFI();
+            break;
+        case 5:
+            analog = analogRead(TEMP_SENSOR);
+            vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
+            data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
+
+            //Get the CPU temperature
+            data.cpuTemp = analogReadTemp();
+            generarePagTEMP(data.temp, data.cpuTemp);
+            break;
+        case 6:
+            generarePagGPS();
+            break;        
     }
 
     uint16_t dt = millis() - t0;

@@ -71,30 +71,7 @@ const unsigned char term [] PROGMEM = {
 #define ADC_BITS 12
 #define ADC_MAX_VAL ((1 << ADC_BITS) - 1)
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-//Timers 
-uint64_t t0 = 0;
-uint64_t t1 = 0;
-uint64_t t2 = 0;  //Timer for UART
-uint64_t t3 = 0;  //Timer for LCD
-uint64_t t4 = 0;
-
-typedef struct {
-  float cpuTemp;
-  float temp;
-} SensorData;
-
-SensorData data;
-
-int valBottoneR = 0;
-int valBottoneL = 0;
-int valBottoneD = 0;
-int valBottoneU = 0;
-
-int nscheda = 0;
-int nschedaCAL = 0;
-int nschedaSTART = 0;
+bool lcdInit(uint8_t);
 
 //funzione per nscheda
 int getNScheda();
@@ -108,13 +85,13 @@ void generarePagCAL2();
 //Pagine a scorrimento su asse y
 void generarePagSTART();
 void generarePagREADY();
-void generarePagFIND();
+void generarePagFIND(double);
 
 void generarePagTIME();
 
 void generarePagWIFI();
 
-void generarePagTEMP();
+void generarePagTEMP(float, float);
 
 void generarePagGPS();
 
