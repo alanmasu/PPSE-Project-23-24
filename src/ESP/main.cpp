@@ -85,6 +85,14 @@ void handleRgbLed(){
   webRequest->send(200, "text/plain", reply);
 }
 
+void handlAactualPosition(){
+  WebServerClass* webRequest = myWebServer.getRequest();
+  StaticJsonDocument<200> doc;
+  
+  String reply = "{\"cpuTemp\": \"" + String(data.cpuTemp) + "\",\"temp\":\""+ String(data.temp) + "\"}";
+  webRequest->send(200, "text/json", reply);
+}
+
 void handleSetLeds(){
   WebServerClass* webRequest = myWebServer.getRequest();
   if(webRequest->hasArg("color")) {
