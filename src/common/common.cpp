@@ -70,3 +70,14 @@ String splitString(String str, char sep, int index) {
   }
   return found > index ? str.substring(strIdx[0], strIdx[1]) : "";
 }
+
+// String popolareDatiDaMandare(){
+//   String d;
+//   WayPoint_t dati;
+//   dati.timeInfo_1 = getRMCData()->timeInfo;
+//   dati.latitude_1 = getGGAData()->latitude;
+//   strcpy(getGGAData()->longitude,dati.longitude_1);
+//   dati.fix_1 = getGGAData()->fix;
+  
+//   return d;
+// }
