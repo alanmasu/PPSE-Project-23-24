@@ -196,6 +196,8 @@ void generarePagREADY(){
     display.setTextSize(1);
     display.println("UP : delete WayPoint");
 
+    display.drawBitmap(0,24,mont,128,28,WHITE);
+
     display.setCursor(0,55);
     display.println("DOWN : find WayPoint");
     display.display();
@@ -313,9 +315,9 @@ void generarePagWIFI(String ssid,String ip,bool ap){
     //CORPO
 
     display.setTextSize(1);
-    display.print("ssid : ");
+    display.print("SSID : ");
     display.println(ssid);
-    display.print("ip : ");
+    display.print("IP : ");
     display.println(ip);
     if(ap){
         display.setCursor(23,display.getCursorY());
@@ -323,7 +325,7 @@ void generarePagWIFI(String ssid,String ip,bool ap){
     } else{
         display.println("\n\n");
     }
-    display.print("DOWN : Start AP mode");
+    display.print("DOWN : Start AP ...");
 
     display.display();
 }
@@ -430,6 +432,9 @@ void generarePagINFO(String rp2040comm,String espcomm){
     display.println("INFO");          
 
     //CORPO
+
+    display.drawBitmap(85,25,po,50,30,WHITE);
+
     display.setTextSize(1);
     display.println("\nRP2040 commit:");
     display.println(rp2040comm);
