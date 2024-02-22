@@ -65,8 +65,6 @@ void startFilesystem(){
 ////////////////////////////  HTTP Request Handlers  ////////////////////////////////////
 void handleLed() {
   WebServerClass* webRequest = myWebServer.getRequest();
-
-  // http://xxx.xxx.xxx.xxx/led?val=1
   if(webRequest->hasArg("val")) {
     int value = webRequest->arg("val").toInt();
     digitalWrite(ledPin, value);
@@ -79,21 +77,8 @@ void handleLed() {
 
 void handleMainEndpoint() {
   WebServerClass* webRequest = myWebServer.getRequest();
-
   String reply = "{\"cpuTemp\": \"" + String(applicationRecord.cpuTemp) + "\",\"temp\":\""+ String(applicationRecord.temp) + "\"}";
   webRequest->send(200, "text/json", reply);
-}
-
-void handleRgbLed(){
-  WebServerClass* webRequest = myWebServer.getRequest();
-  if(webRequest->hasArg("val")) {
-    int value = webRequest->arg("val").toInt();
-    msgData.ledState = value;
-  }
-
-  String reply = "LEDS are now ";
-  reply += !msgData.ledState ? "OFF" : "ON";
-  webRequest->send(200, "text/plain", reply);
 }
 
 void handleActualPosition(){
@@ -129,25 +114,13 @@ void handleWaypointList(){
   webRequest->send(200, "text/json", reply);
 }
 
-void handleSetLeds(){
-  WebServerClass* webRequest = myWebServer.getRequest();
-  if(webRequest->hasArg("color")) {
-    int color = webRequest->arg("color").toInt();
-    msgData.ledColor = color;
-  }
-  if(webRequest->hasArg("count")) {
-    int count = webRequest->arg("count").toInt();
-    msgData.ledCount = count;
-  }
-  // webRequest->sendHeader("Location", String("/"), true);
-  // webRequest->send(307, "text/plain", "Temporary Redirect"); 
-  webRequest->send(200, "text/plain", "Ok"); 
-}
 
 void setup(){
-  Serial.begin(115200);
-  Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
-  Serial.printf("Built on %s at %s\n", __DATE__, __TIME__);
+  #ifdef ESP32
+    Serial.begin(115200);
+    Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
+    Serial.printf("Built on %s at %s\n", __DATE__, __TIME__);
+  #endif
   SERIAL_TO_USE.begin(115200);
   SERIAL_TO_USE.println(sizeof(IPAddress));
   // FILESYSTEM INIT
@@ -161,8 +134,6 @@ void setup(){
   myWebServer.addHandler("/actualPosition", HTTP_GET, handleActualPosition);
   myWebServer.addHandler("/waypointList", HTTP_GET, handleWaypointList);
   myWebServer.addHandler("/led", HTTP_GET, handleLed);
-  myWebServer.addHandler("/rgbLed", HTTP_GET, handleRgbLed);
-  myWebServer.addHandler("/setLeds", HTTP_POST, handleSetLeds);
 
   // Start webserver
   if (myWebServer.begin()) {
@@ -175,16 +146,10 @@ void setup(){
 
   pinMode(LED_BUILTIN, OUTPUT);
   #ifdef ESP32
-  pinMode(0, INPUT);
-  btnStatus = !digitalRead(0);
-  btnStatusP = btnStatus;
+    pinMode(0, INPUT);
+    btnStatus = !digitalRead(0);
+    btnStatusP = btnStatus;
   #endif
-  //Initialize the WS2812 LED strip
-  msgData.ledBrightness = 255;
-
-  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(WiFiConfiguration_t));
-  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(wifiConfig));
-
 }
 
 void loop() {
@@ -192,14 +157,20 @@ void loop() {
     SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord)) != sizeof(applicationRecord);
   }
   #ifdef ESP32
-  //Reading button on GPIO0
-  btnStatus = !digitalRead(0);
-  if(btnStatus != btnStatusP && btnStatus){
-    myWebServer.startAP();
-    Serial.println("Starting AP");
-  }
-  btnStatusP = btnStatus;
+    //Reading button on GPIO0
+    btnStatus = !digitalRead(0);
+    if(btnStatus != btnStatusP && btnStatus || applicationRecord.gotoAP){
+      myWebServer.startAP();
+      Serial.println("Starting AP");
+    }
+    btnStatusP = btnStatus;
+  #else
+    if(applicationRecord.gotoAP){
+      myWebServer.startAP();
+      Serial.println("Starting AP");
+    }
   #endif
+
 
   myWebServer.run();
   if(millis() - t0 > 1000){
@@ -223,6 +194,8 @@ void loop() {
     SERIAL_TO_USE.printf("%s;", wifiConfig.ssid);
     SERIAL_TO_USE.print(wifiConfig.ipAddress);
     SERIAL_TO_USE.printf(";%d\n", wifiConfig.ap);
-    Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
+    #ifdef ESP32
+      Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
+    #endif
   }
 }

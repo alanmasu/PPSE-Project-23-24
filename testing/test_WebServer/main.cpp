@@ -9,14 +9,11 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-//WS2812 LED libraries
-#include <Adafruit_NeoPixel.h>
+#define SCREEN_WIDTH   128  // OLED display width, in pixels
+#define SCREEN_HEIGHT  64   // OLED display height, in pixels
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3C 
+#define OLED_RESET     -1   // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C // See datasheet for Address; 0x3C 
 
 #define ADC_BITS 12
 #define ADC_MAX_VAL ((1 << ADC_BITS) - 1)
@@ -27,15 +24,6 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 uint64_t t0 = 0;      //Timer for the alive LED
 uint64_t t1 = 0;      //Timer for temperature sensor
 uint64_t t2 = 0;      //Timer for ESP UART
-uint64_t tLeds = 0;   //Timer for the LED strip
-
-#define LED_COUNT  8
-
-// NeoPixel brightness, 0 (min) to 255 (max)
-#define BRIGHTNESS 50 // Set BRIGHTNESS to about 1/5 (max = 255)
-
-// Declare our NeoPixel strip object:
-Adafruit_NeoPixel strip(LED_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
 ApplicationRecord_t applicationRecord;
 WiFiConfiguration_t wifiConfig;
@@ -99,14 +87,6 @@ void setup() {
   Serial1.setRX(ESP_TX);
   Serial1.setTX(ESP_RX);
   Serial1.begin(115200);
-
-  //Initialize the WS2812 LED strip
-  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
-  strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(BRIGHTNESS);
-
-  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(WiFiConfiguration_t));
-  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(wifiConfig));
 }
 
 void loop() {
@@ -122,7 +102,7 @@ void loop() {
   if(millis() - t1 > 1000) {
     int analog = analogRead(TEMP_SENSOR);
     float vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
-    applicationRecord.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
+    applicationRecord.temp = (vTempSensor - 500) * 0.10;               // Temp in C (10mV/C)  
 
     //Get the CPU temperature
     applicationRecord.cpuTemp = analogReadTemp(3.27);
@@ -146,15 +126,6 @@ void loop() {
     display.print("T: ");          
     display.print(tempString);
     display.println(" C");
-
-    // display.setTextSize(1);
-    // display.print("R: ");
-    // display.println(ledR);
-    // display.print("G: ");
-    // display.println(ledG);
-    // display.print("B: ");
-    // display.println(ledB);
-
     display.display();
     t1 = millis();
   }
@@ -176,23 +147,4 @@ void loop() {
     wifiConfig.ipAddress.fromString(ip);
     wifiConfig.ap = splitString(str, ';', 2).toInt();
   }
-
-
-  // if(millis() - tLeds > 1000) {
-  //   if(!msgData.ledState) {
-  //       strip.clear();
-  //       strip.show();
-  //   }else{
-  //     for(uint8_t i = 0; i < LED_COUNT; i++) {
-  //       if(i < msgData.ledCount) {
-  //         strip.setPixelColor(i, strip.Color(ledR, ledG, ledB));
-  //       }else{
-  //         strip.setPixelColor(i, strip.Color(0, 0, 0));
-  //       }
-  //       strip.show();
-  //     }
-  //   }
-  //   tLeds = millis();
-  // }
-
 }
