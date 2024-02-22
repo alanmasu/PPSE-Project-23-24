@@ -70,7 +70,13 @@ void handleLed() {
   WebServerClass* webRequest = myWebServer.getRequest();
   if(webRequest->hasArg("val")) {
     int value = webRequest->arg("val").toInt();
-    digitalWrite(ledPin, value);
+    #ifdef ESP32
+      digitalWrite(ledPin, value);
+    #else
+      #if defined(ESP8266)
+        digitalWrite(ledPin, !value);
+      #endif
+    #endif
   }
 
   String reply = "LED is now ";
@@ -157,6 +163,8 @@ void setup(){
     pinMode(0, INPUT);
     btnStatus = !digitalRead(0);
     btnStatusP = btnStatus;
+  #else 
+    digitalWrite(LED_BUILTIN, HIGH);
   #endif
 }
 
