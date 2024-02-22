@@ -122,7 +122,7 @@ void handleWaypointList(){
 
 void setup(){
   #ifdef ESP8266
-    ESP.wdtDisable();
+    ESP.wdtEnable(3000);
   #endif
   #ifdef ESP32
     Serial.begin(115200);
@@ -173,6 +173,7 @@ void loop() {
     }
     btnStatusP = btnStatus;
   #else
+    ESP.wdtFeed();
     if(applicationRecord.gotoAP){
       myWebServer.startAP();
       Serial.println("Starting AP");
