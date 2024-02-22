@@ -32,8 +32,6 @@ FSWebServer myWebServer(FILESYSTEM, server);
 
 ApplicationRecord_t applicationRecord;
 
-MsgData msgData;
-
 WiFiConfiguration_t wifiConfig;
 
 StaticJsonDocument<200> doc;
