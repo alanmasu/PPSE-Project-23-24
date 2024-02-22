@@ -2,6 +2,7 @@
 #include <git_revision.h>
 #include "PSEBoard.h"
 #include "common.h"
+#include <IPAddress.h>
 
 //OLED display libraries
 #include <Wire.h>
@@ -36,7 +37,8 @@ uint64_t tLeds = 0;   //Timer for the LED strip
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel strip(LED_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 
-ServerData data;
+ApplicationRecord_t applicationRecord;
+WiFiConfiguration_t wifiConfig;
 
 void setup() {
 
@@ -58,9 +60,9 @@ void setup() {
     }else if(200 < dt){
       t0 = millis();
     }
-    if(!digitalRead(BTN_UP)) {
-      break;
-    }
+    // if(!digitalRead(BTN_UP)) {
+    //   break;
+    // }
   } 
   delay(2000);
   // while(!Serial);
@@ -103,12 +105,9 @@ void setup() {
   strip.show();            // Turn OFF all pixels ASAP
   strip.setBrightness(BRIGHTNESS);
 
+  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(WiFiConfiguration_t));
+  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(wifiConfig));
 }
-
-MsgData msgData;
-uint8_t ledR = 0;
-uint8_t ledG = 0;
-uint8_t ledB = 0;
 
 void loop() {
   uint16_t dt = millis() - t0;
@@ -123,17 +122,17 @@ void loop() {
   if(millis() - t1 > 1000) {
     int analog = analogRead(TEMP_SENSOR);
     float vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
-    data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
+    applicationRecord.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
 
     //Get the CPU temperature
-    data.cpuTemp = analogReadTemp(3.27);
+    applicationRecord.cpuTemp = analogReadTemp(3.27);
   
     // Serial.printf("Analog read: %d,\tTEMP Voltage: %f,\tTemp: %f,\tCPU T: %f\n",analog, vTempSensor, data.temp, data.cpuTemp);
   
 
     //Print the temperature to the OLED display
-    String tempString = String(data.temp);
-    String CPUTempString = String(data.cpuTemp);
+    String tempString = String(applicationRecord.temp);
+    String CPUTempString = String(applicationRecord.cpuTemp);
 
     display.clearDisplay();
 
@@ -148,56 +147,52 @@ void loop() {
     display.print(tempString);
     display.println(" C");
 
-    display.setTextSize(1);
-    display.print("R: ");
-    display.println(ledR);
-    display.print("G: ");
-    display.println(ledG);
-    display.print("B: ");
-    display.println(ledB);
+    // display.setTextSize(1);
+    // display.print("R: ");
+    // display.println(ledR);
+    // display.print("G: ");
+    // display.println(ledG);
+    // display.print("B: ");
+    // display.println(ledB);
 
     display.display();
     t1 = millis();
   }
 
   if(millis() - t2 > 1000) {
-    Serial1.write((byte*)&data, sizeof(data));
+    Serial1.write((byte*)&applicationRecord, sizeof(applicationRecord));
     t2 = millis();
+    Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
   }
-
+  String str;
   while(Serial1.available()>0) {
-    String str = Serial1.readStringUntil('\n');
-    if(str != "") {
-      Serial.println(str);
-    }
-    msgData.ledState = splitString(str, ';', 0).toInt();
-    msgData.ledCount = splitString(str, ';', 1).toInt();
-    ledR = (msgData.ledColor >> 16);
-    ledG = (msgData.ledColor >> 8);
-    ledB = (msgData.ledColor);
-    msgData.ledColor = splitString(str, ';', 2).toInt();
-    msgData.ledBrightness = splitString(str, ';', 3).toInt();
-    msgData.connState = (ConnectionState)splitString(str, ';', 4).toInt();
-    msgData.ip.fromString(splitString(str, ';', 5));
-    msgData.apMode = (bool)splitString(str, ';', 6).toInt();
-    msgData.ssid = splitString(str, ';', 7);
+    str = Serial1.readStringUntil('\n');
+  }
+  if(str != ""){
+    memcpy(wifiConfig.ssid, splitString(str, ';', 0).c_str(), 32);
+    wifiConfig.ssid[32] = '\0';
+    String ip = splitString(str, ';', 1);
+    // wifiConfig.ipAddress = IPAddress();
+    wifiConfig.ipAddress.fromString(ip);
+    wifiConfig.ap = splitString(str, ';', 2).toInt();
   }
 
-  if(millis() - tLeds > 1000) {
-    if(!msgData.ledState) {
-        strip.clear();
-        strip.show();
-    }else{
-      for(uint8_t i = 0; i < LED_COUNT; i++) {
-        if(i < msgData.ledCount) {
-          strip.setPixelColor(i, strip.Color(ledR, ledG, ledB));
-        }else{
-          strip.setPixelColor(i, strip.Color(0, 0, 0));
-        }
-        strip.show();
-      }
-    }
-    tLeds = millis();
-  }
+
+  // if(millis() - tLeds > 1000) {
+  //   if(!msgData.ledState) {
+  //       strip.clear();
+  //       strip.show();
+  //   }else{
+  //     for(uint8_t i = 0; i < LED_COUNT; i++) {
+  //       if(i < msgData.ledCount) {
+  //         strip.setPixelColor(i, strip.Color(ledR, ledG, ledB));
+  //       }else{
+  //         strip.setPixelColor(i, strip.Color(0, 0, 0));
+  //       }
+  //       strip.show();
+  //     }
+  //   }
+  //   tLeds = millis();
+  // }
 
 }

@@ -7,8 +7,9 @@
 
 #define FILESYSTEM LittleFS
 
-#define LED_BUILTIN 2
-
+#ifndef LED_BUILTIN
+  #define LED_BUILTIN 2
+#endif
 // In order to set SSID and password open the /setup webserver page
 // const char* ssid;
 // const char* password;
@@ -26,9 +27,19 @@ bool apMode = false;
 
 FSWebServer myWebServer(FILESYSTEM, server);
 
-ServerData data;
+ApplicationRecord_t applicationRecord;
 
 MsgData msgData;
+
+WiFiConfiguration_t wifiConfig;
+
+StaticJsonDocument<200> doc;
+
+
+uint64_t t0 = 0;
+
+bool btnStatus = false;
+bool btnStatusP = false;
 
 ////////////////////////////////  Filesystem  /////////////////////////////////////////
 void startFilesystem(){
@@ -69,7 +80,7 @@ void handleLed() {
 void handleMainEndpoint() {
   WebServerClass* webRequest = myWebServer.getRequest();
 
-  String reply = "{\"cpuTemp\": \"" + String(data.cpuTemp) + "\",\"temp\":\""+ String(data.temp) + "\"}";
+  String reply = "{\"cpuTemp\": \"" + String(applicationRecord.cpuTemp) + "\",\"temp\":\""+ String(applicationRecord.temp) + "\"}";
   webRequest->send(200, "text/json", reply);
 }
 
@@ -85,11 +96,36 @@ void handleRgbLed(){
   webRequest->send(200, "text/plain", reply);
 }
 
-void handlAactualPosition(){
+void handleActualPosition(){
   WebServerClass* webRequest = myWebServer.getRequest();
-  StaticJsonDocument<200> doc;
   
-  String reply = "{\"cpuTemp\": \"" + String(data.cpuTemp) + "\",\"temp\":\""+ String(data.temp) + "\"}";
+  doc["time"] = mktime(&applicationRecord.actualPoint.timeInfo);
+  JsonArray actualCoordinates = doc.createNestedArray("actualCoordinates");
+  actualCoordinates[0] = applicationRecord.actualPoint.latitude;
+  actualCoordinates[1] = applicationRecord.actualPoint.longitude;
+  doc["fix"] = applicationRecord.actualPoint.fix;
+  doc["fixType"] = applicationRecord.actualPoint.fixType;
+  doc["hdop"] = applicationRecord.actualPoint.hdop;
+  doc["temp"] = applicationRecord.temp;
+
+  String reply;
+  serializeJson(doc, reply);
+  webRequest->send(200, "text/json", reply);
+}
+
+void handleWaypointList(){
+  WebServerClass* webRequest = myWebServer.getRequest();
+  JsonArray waypoints = doc.to<JsonArray>();
+  JsonObject obj = waypoints.createNestedObject();
+  obj["time"] = mktime(&applicationRecord.firstWayPoint.timeInfo);
+  JsonArray actualCoordinates = obj.createNestedArray("actualCoordinates");
+  obj["fix"] = applicationRecord.firstWayPoint.fix;
+  obj["fixType"] = applicationRecord.firstWayPoint.fixType;
+  obj["hdop"] = applicationRecord.firstWayPoint.hdop;
+  obj["temp"] = applicationRecord.temp;
+
+  String reply;
+  serializeJson(doc, reply);
   webRequest->send(200, "text/json", reply);
 }
 
@@ -122,6 +158,8 @@ void setup(){
 
   // Add custom page handlers to webserver
   myWebServer.addHandler("/mainPageEndpoint", HTTP_GET, handleMainEndpoint);
+  myWebServer.addHandler("/actualPosition", HTTP_GET, handleActualPosition);
+  myWebServer.addHandler("/waypointList", HTTP_GET, handleWaypointList);
   myWebServer.addHandler("/led", HTTP_GET, handleLed);
   myWebServer.addHandler("/rgbLed", HTTP_GET, handleRgbLed);
   myWebServer.addHandler("/setLeds", HTTP_POST, handleSetLeds);
@@ -136,28 +174,55 @@ void setup(){
   }
 
   pinMode(LED_BUILTIN, OUTPUT);
-
+  #ifdef ESP32
+  pinMode(0, INPUT);
+  btnStatus = !digitalRead(0);
+  btnStatusP = btnStatus;
+  #endif
   //Initialize the WS2812 LED strip
   msgData.ledBrightness = 255;
 
-}
+  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(WiFiConfiguration_t));
+  // Serial.printf("Size of WiFiConfiguration_t: %d\n", sizeof(wifiConfig));
 
-uint64_t t0 = 0;
+}
 
 void loop() {
   if(SERIAL_TO_USE.available() > 0){
-    SERIAL_TO_USE.readBytes((char*)&data, sizeof(ServerData)) != sizeof(ServerData);
-    // if(SERIAL_TO_USE.readBytes((char*)&data, sizeof(ServerData)) != sizeof(ServerData)){
-    //   SERIAL_TO_USE.println("ERROR: SERIAL_TO_USE.readBytes() failed!");
-    // }else{
-    //   SERIAL_TO_USE.printf("CPU Temp: %f, Temp: %f\n", data.cpuTemp, data.temp);
-    // }
+    SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord)) != sizeof(applicationRecord);
   }
+  #ifdef ESP32
+  //Reading button on GPIO0
+  btnStatus = !digitalRead(0);
+  if(btnStatus != btnStatusP && btnStatus){
+    myWebServer.startAP();
+    Serial.println("Starting AP");
+  }
+  btnStatusP = btnStatus;
+  #endif
+
   myWebServer.run();
   if(millis() - t0 > 1000){
     t0 = millis();
-    SERIAL_TO_USE.printf("%d;%d;%d;%d;%d;", msgData.ledState, msgData.ledCount, msgData.ledColor, msgData.ledBrightness, msgData.connState);
-    SERIAL_TO_USE.print(WiFi.localIP());
-    SERIAL_TO_USE.printf(";%d;%s\n", msgData.apMode, WiFi.SSID().c_str());
+    wifiConfig.ap = myWebServer.getAPMode();
+    if(!wifiConfig.ap){
+      if(WiFi.status() == WL_CONNECTED){
+        wifiConfig.ipAddress = WiFi.localIP();
+        memcpy(wifiConfig.ssid, WiFi.SSID().c_str(), 32);
+      }else{
+        wifiConfig.ipAddress = IPAddress();
+        strcpy(wifiConfig.ssid, "Not connected!");
+      }
+    }else{
+      wifiConfig.ipAddress = WiFi.softAPIP();
+      memcpy(wifiConfig.ssid, WiFi.softAPSSID().c_str(), 32);
+    }
+    wifiConfig.ssid[32] = '\0';
+    
+    // SERIAL_TO_USE.write((uint8_t*)&wifiConfig, sizeof(wifiConfig));
+    SERIAL_TO_USE.printf("%s;", wifiConfig.ssid);
+    SERIAL_TO_USE.print(wifiConfig.ipAddress);
+    SERIAL_TO_USE.printf(";%d\n", wifiConfig.ap);
+    Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
   }
 }

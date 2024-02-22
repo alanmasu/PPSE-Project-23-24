@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <Stream.h>
+#include <IPAddress.h>
 
 #ifdef ESP8266
   #include <ESP8266WiFi.h>
@@ -47,24 +48,25 @@ String splitString(String str, char sep, int index);
 
 typedef struct {
     int8_t sats;
-    struct tm timeInfo_1;
-    float latitude_1;                      
-    float longitude_1;  
-    bool fix_1;
-    int fix_num_1;
-    float hdop_1;
-    float temp_t;
+    struct tm timeInfo;
+    float latitude;                      
+    float longitude;  
+    bool fix;
+    int fixType;
+    float hdop;
+    float temp;
 } WayPoint_t; 
 
 typedef struct{
     WayPoint_t actualPoint;
     WayPoint_t firstWayPoint;
     float temp;
+    float cpuTemp;
     bool gotoAP;
 } ApplicationRecord_t;
 
 typedef struct{
-    char ssid[32];
+    char ssid[33];
     IPAddress ipAddress;
     bool ap;   
 }WiFiConfiguration_t;
