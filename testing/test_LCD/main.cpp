@@ -34,6 +34,7 @@ int valBottoneD = 0;
 int valBottoneU = 0;
 bool updatePage = false;
 bool blinkBussola = false;
+bool angleMov = false;
 
 State_t actualState = IDLE;
 Page_t actualPage = PAG_INTRO;
@@ -47,7 +48,9 @@ uint64_t t2 = 0;  //Timer for UART
 uint64_t t3 = 0;  //Timer for LCD
 uint64_t t4 = 0;
 uint64_t t5 = 0; //t per bussola
+uint64_t t6 = 0; //t per angolo
 
+double angle = 0;
 
 void setup() {
 
@@ -129,7 +132,7 @@ void loop() {
     valBottoneL = !digitalRead(BTN_LEFT); 
 
     uint16_t tbus = millis() - t5;
-    if(actualPage == PAG_CAL && actualState == CALIBRATING){
+    if(actualPage == PAG_CAL && actualState == CALIBRATING && !updatePage){
         if(tbus > 1000 &&  !blinkBussola) {
             blinkBussola = true;
             cancBussola();
@@ -138,6 +141,18 @@ void loop() {
             disegnaBussola();
             t5 = millis();
         }
+
+    }
+
+    uint16_t tAng = millis() - t6;
+    if(actualPage == PAG_START && actualState == FIND){
+        if(tAng > 500 &&  !angleMov) {
+            angleMov = true;
+        }else if(1000 < tAng && angleMov){
+            angleMov = false;
+            t6 = millis();
+        }
+
     }
 
     // Serial.printf("\n%d", actualPage);
@@ -151,6 +166,8 @@ void loop() {
             case PAG_CAL:
     
                 switch(actualState){
+                    case FIND:
+                    case WAYPOINT:
                     case IDLE:
                         generarePagCAL1();
                         break;
@@ -170,7 +187,11 @@ void loop() {
                         generarePagREADY();
                         break;
                     case FIND:
-                        generarePagFIND(90.0);
+                        generarePagFIND();
+                        if(angleMov){
+                            angle=angle+10;
+                        }
+                        discCerchio(angle);
                         break;
                 }
                 break;

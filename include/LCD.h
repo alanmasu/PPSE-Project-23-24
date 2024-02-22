@@ -76,7 +76,8 @@ void cancBussola();
 //Pagine a scorrimento su asse y
 void generarePagSTART();
 void generarePagREADY();
-void generarePagFIND(double);
+void generarePagFIND();
+void discCerchio(double);
 
 void generarePagTIME();
 

@@ -35,12 +35,12 @@ double getrad(double angle){
 }
 
 int cerchiX(int ragg,double anglerad){
-    int x = 64 + ragg * cos(anglerad);
+    int x = round(64 + ragg * cos(anglerad));
     return x;
 }
 
 int cerchiY(int ragg,double anglerad){
-    int y = 32 + ragg * sin(anglerad);
+    int y = round(32 + ragg * sin(anglerad));
     return y;
 }
 
@@ -202,10 +202,7 @@ void generarePagREADY(){
     display.println("DOWN : find WayPoint");
     display.display();
 }
-void generarePagFIND(double angle){
-    uint8_t x=0;
-    uint8_t y=0;
-    double anglerad = 0;
+void generarePagFIND(){
     display.clearDisplay();
     //FRECCIA DI SINISTRA
     display.setTextSize(2);
@@ -233,6 +230,14 @@ void generarePagFIND(double angle){
     display.setCursor(0,55);
     display.println("UP : exit find page");
         
+    
+    display.display();
+}
+
+void discCerchio(double angle){
+    uint8_t x=0;
+    uint8_t y=0;
+    double anglerad = 0;
     anglerad=getrad(angle);
     x = cerchiX(ragg,anglerad);
     y = cerchiY(ragg,anglerad);
