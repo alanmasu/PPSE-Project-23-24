@@ -119,18 +119,30 @@ void generarePagCAL2(){
 
     //CORPO
 
+    
+   
     uint16_t tb = millis() - timerBussola;
-    if(tb < 1000) {
-        display.drawBitmap(45,18,bussola,35,35,WHITE);
-    }else if(1000 < tb && tb < 2000) {
-        display.drawBitmap(45,18,bussolaCanc,34,34,WHITE);
-    }else if(2000 < tb){
-        timerBussola = millis();
-    }
+    // if(tb < 1000) {
+    //     display.drawBitmap(45,18,bussola,35,35,WHITE);
+    // }else if(1000 < tb && tb < 2000) {
+    //     display.drawBitmap(45,18,bussolaCanc,34,34,WHITE);
+    // }else if(2000 < tb){
+    //     timerBussola = millis();
+    // }
 
     display.setCursor(0,57); 
     display.setTextSize(1);
     display.println("Calibration...");
+    
+}
+
+void disegnaBussola(){
+    display.drawBitmap(45,18,bussola,35,35,WHITE);
+    display.display();
+}
+
+void cancBussola(){
+    display.drawBitmap(45,18,bussolaCanc,34,34,WHITE);
     display.display();
 }
 

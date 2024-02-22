@@ -33,6 +33,7 @@ int valBottoneL = 0;
 int valBottoneD = 0;
 int valBottoneU = 0;
 bool updatePage = false;
+bool blinkBussola = false;
 
 State_t actualState = IDLE;
 Page_t actualPage = PAG_INTRO;
@@ -45,7 +46,7 @@ uint64_t t1 = 0;
 uint64_t t2 = 0;  //Timer for UART
 uint64_t t3 = 0;  //Timer for LCD
 uint64_t t4 = 0;
-
+uint64_t t5 = 0; //t per bussola
 
 
 void setup() {
@@ -106,6 +107,7 @@ void setup() {
 
 }
 
+
 void loop() {
     int analog;
     float vTempSensor;
@@ -126,7 +128,19 @@ void loop() {
     valBottoneR = !digitalRead(BTN_RIGHT);
     valBottoneL = !digitalRead(BTN_LEFT); 
 
-    Serial.printf("\n%d", actualPage);
+    uint16_t tbus = millis() - t5;
+    if(actualPage == PAG_CAL && actualState == CALIBRATING){
+        if(tbus > 1000 &&  !blinkBussola) {
+            blinkBussola = true;
+            cancBussola();
+        }else if(2000 < tbus && blinkBussola){
+            blinkBussola = false;
+            disegnaBussola();
+            t5 = millis();
+        }
+    }
+
+    // Serial.printf("\n%d", actualPage);
     if(millis() - t3 > 1000 || updatePage){
         updatePage = false;
         t3= millis();
@@ -144,9 +158,7 @@ void loop() {
                         generarePagCAL2();
                         break;
                 }
-                 
                 break;
-            
             case PAG_START:
                 
                 switch (actualState){
@@ -157,12 +169,10 @@ void loop() {
                     case WAYPOINT:                   
                         generarePagREADY();
                         break;
-                    
                     case FIND:
                         generarePagFIND(90.0);
                         break;
                 }
-                
                 break;
             case PAG_TIME:
                 generarePagTIME();
@@ -173,8 +183,7 @@ void loop() {
             case PAG_TEMP:
                 analog = analogRead(TEMP_SENSOR);
                 vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
-                data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
-
+                data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)
                 //Get the CPU temperature
                 data.cpuTemp = analogReadTemp();
                 generarePagTEMP(data.temp, data.cpuTemp);
@@ -203,7 +212,6 @@ void loop() {
                 actualState = CALIBRATING;
                 updatePage = true;
             }
-          
             // if(calibrationDone()){
             //     actualState = IDLE;
             // }
@@ -254,7 +262,7 @@ void loop() {
     }
     
     if(millis() - t2 > 1000) {
-        Serial.println(valBottoneR);
+        // Serial.println(valBottoneR);
         Serial1.write((byte*)&data, sizeof(data));
         t2 = millis();
     }

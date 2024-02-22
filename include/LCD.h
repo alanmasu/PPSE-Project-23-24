@@ -70,6 +70,8 @@ void generarePagINTRO();
 //Pagine a scorrimento su asse y
 void generarePagCAL1();
 void generarePagCAL2();
+void disegnaBussola();
+void cancBussola();
 
 //Pagine a scorrimento su asse y
 void generarePagSTART();
