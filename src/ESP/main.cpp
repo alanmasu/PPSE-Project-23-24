@@ -9,6 +9,9 @@
 
 #ifndef LED_BUILTIN
   #define LED_BUILTIN 2
+#elif defined(ESP8266) && defined(LED_BUILTIN)
+  #undef LED_BUILTIN
+  #define LED_BUILTIN 2
 #endif
 // In order to set SSID and password open the /setup webserver page
 // const char* ssid;
@@ -104,6 +107,8 @@ void handleWaypointList(){
   JsonObject obj = waypoints.createNestedObject();
   obj["time"] = mktime(&applicationRecord.firstWayPoint.timeInfo);
   JsonArray actualCoordinates = obj.createNestedArray("actualCoordinates");
+  actualCoordinates[0] = applicationRecord.firstWayPoint.latitude;
+  actualCoordinates[1] = applicationRecord.firstWayPoint.longitude;
   obj["fix"] = applicationRecord.firstWayPoint.fix;
   obj["fixType"] = applicationRecord.firstWayPoint.fixType;
   obj["hdop"] = applicationRecord.firstWayPoint.hdop;
@@ -116,13 +121,16 @@ void handleWaypointList(){
 
 
 void setup(){
+  #ifdef ESP8266
+    ESP.wdtDisable();
+  #endif
   #ifdef ESP32
     Serial.begin(115200);
     Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
     Serial.printf("Built on %s at %s\n", __DATE__, __TIME__);
   #endif
   SERIAL_TO_USE.begin(115200);
-  SERIAL_TO_USE.println(sizeof(IPAddress));
+
   // FILESYSTEM INIT
   startFilesystem();
 
@@ -154,7 +162,7 @@ void setup(){
 
 void loop() {
   if(SERIAL_TO_USE.available() > 0){
-    SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord)) != sizeof(applicationRecord);
+    SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord));
   }
   #ifdef ESP32
     //Reading button on GPIO0
