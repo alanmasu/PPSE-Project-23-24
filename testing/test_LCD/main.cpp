@@ -13,6 +13,10 @@
   #endif
 #endif
 
+enum Page_t {PAG_INTRO = 0,PAG_CAL, PAG_START,PAG_TIME,PAG_WIFI,PAG_TEMP,PAG_GPS};
+
+enum State_t {IDLE=0,CALIBRATING,WAYPOINT,FIND};
+
 typedef struct {
   float cpuTemp;
   float temp;
@@ -30,8 +34,8 @@ int valBottoneD = 0;
 int valBottoneU = 0;
 bool updatePage = false;
 
-
-int nscheda = 0;
+State_t actualState = IDLE;
+Page_t actualPage = PAG_INTRO;
 int nschedaCAL = 0;
 int nschedaSTART = 0;
 
@@ -41,6 +45,8 @@ uint64_t t1 = 0;
 uint64_t t2 = 0;  //Timer for UART
 uint64_t t3 = 0;  //Timer for LCD
 uint64_t t4 = 0;
+
+
 
 void setup() {
 
@@ -104,85 +110,67 @@ void loop() {
     int analog;
     float vTempSensor;
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
-        nscheda++;
+        actualPage = (Page_t)(actualPage + 1);
         updatePage = true;
-        if(nscheda>6){
-            nscheda=6;
+        if(actualPage>6){
+            actualPage=PAG_GPS;
         }
     }else if(!digitalRead(BTN_LEFT) != valBottoneL && !digitalRead(BTN_LEFT)){
-        nscheda--;
+        actualPage = (Page_t)(actualPage - 1);
         updatePage = true;
-        if(nscheda<0){
-            nscheda=0;
+        if(actualPage<0){
+            actualPage=PAG_INTRO;
         }
     }
     
     valBottoneR = !digitalRead(BTN_RIGHT);
     valBottoneL = !digitalRead(BTN_LEFT); 
 
-    Serial.printf("\n%d", nscheda);
+    Serial.printf("\n%d", actualPage);
     if(millis() - t3 > 1000 || updatePage){
         updatePage = false;
         t3= millis();
-        switch (nscheda){
-            case 0:
+        switch (actualPage){
+            case PAG_INTRO:
                 generarePagINTRO();
                 break;
-            case 1:
-                //CAMBIARE PAGINA
-                if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
-                    nschedaCAL++;
-                    if(nschedaCAL>1){
-                        nschedaCAL=1;
-                    }
+            case PAG_CAL:
+    
+                switch(actualState){
+                    case IDLE:
+                        generarePagCAL1();
+                        break;
+                    case CALIBRATING:
+                        generarePagCAL2();
+                        break;
                 }
-        
-                if(nschedaCAL==1){                    
-                    generarePagCAL2();
-                }else{
-                    generarePagCAL1();
-                }
-                valBottoneD = !digitalRead(BTN_DOWN); 
+                 
                 break;
             
-            case 2:
-                if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
-                    nschedaSTART++;
-                    if(nschedaSTART>2){
-                        nschedaSTART=2;
-                    }
-                }
-
-                if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
-                    nschedaSTART--;
-                    if(nschedaSTART<0){
-                        nschedaSTART=0;
-                    }
-                }
-
-                switch (nschedaSTART){
-                    case 0:
+            case PAG_START:
+                
+                switch (actualState){
+                    case IDLE:
+                    case CALIBRATING:
                         generarePagSTART();
                         break;
-                    case 1:                   
+                    case WAYPOINT:                   
                         generarePagREADY();
                         break;
                     
-                    case 2:
+                    case FIND:
                         generarePagFIND(90.0);
                         break;
                 }
                 
-                valBottoneD = !digitalRead(BTN_DOWN);
-                valBottoneU = !digitalRead(BTN_UP);
                 break;
-            case 3:
+            case PAG_TIME:
                 generarePagTIME();
                 break;
-            case 4:
+            case PAG_WIFI:
                 generarePagWIFI();
                 break;
-            case 5:
+            case PAG_TEMP:
                 analog = analogRead(TEMP_SENSOR);
                 vTempSensor = analog * (3.3 / ADC_MAX_VAL) * 1000;           // V in mV
                 data.temp = (vTempSensor - 500) * 0.10;                    // Temp in C (10mV/C)  
@@ -191,11 +179,70 @@ void loop() {
                 data.cpuTemp = analogReadTemp();
                 generarePagTEMP(data.temp, data.cpuTemp);
                 break;
-            case 6:
+            case PAG_GPS:
                 generarePagGPS();
                 break;        
         }
     }
+
+    //MACCHINA A STATI
+    bool btnDWEdge = false;
+    bool btnUPEdge = false;
+    if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
+        btnDWEdge = true;
+    }else if(!digitalRead(BTN_UP) != valBottoneU && !digitalRead(BTN_UP)){
+        btnUPEdge = true;
+    }
+
+    valBottoneD = !digitalRead(BTN_DOWN);
+    valBottoneU = !digitalRead(BTN_UP);
+
+    switch(actualPage){
+        case PAG_CAL:
+            if(btnDWEdge){
+                actualState = CALIBRATING;
+                updatePage = true;
+            }
+          
+            // if(calibrationDone()){
+            //     actualState = IDLE;
+            // }
+            break;
+        case PAG_START:
+            switch(actualState){
+                case IDLE:
+
+                    if(btnDWEdge){
+                        actualState=WAYPOINT;
+                        updatePage = true;
+                    }
+                    break;
+
+                case WAYPOINT:
+                    
+                    if(btnDWEdge){
+
+                        actualState=FIND;
+                        updatePage = true;
+                    }
+                    if(btnUPEdge){
+                        actualState = IDLE;
+                        updatePage = true;
+                    }
+                    break;
+
+                case FIND:
+                    
+                    if(btnUPEdge){
+                        actualState = WAYPOINT;
+                        updatePage = true;
+                    }
+                    break;
+            }
+                    
+           break;
+    }
+    
 
     uint16_t dt = millis() - t0;
     if(dt < 1000) {
