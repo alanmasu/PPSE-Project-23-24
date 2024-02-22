@@ -44,8 +44,6 @@ int cerchiY(int ragg,double anglerad){
     return y;
 }
 
-//funzione per nscheda
-int getNScheda();
 
 void generarePagINTRO(){
     display.clearDisplay();
@@ -190,9 +188,9 @@ void generarePagREADY(){
     display.write("4\n");
 
     //TITOLO
-    display.setCursor(32,0);   
+    display.setCursor(35,0);   
     display.setTextSize(2);
-    display.println("BHO");
+    display.println("READY");
     
     //CORPO
     display.setTextSize(1);
@@ -246,7 +244,7 @@ void discCerchio(double angle){
     display.display();
 }
 
-void generarePagTIME(){
+void generarePagTIME(struct tm time){
     display.clearDisplay();
             
     //TITOLO
@@ -278,18 +276,22 @@ void generarePagTIME(){
     //DATA
     display.setCursor(55,27); 
     display.setTextSize(1);
-    display.print("20/02/2024");
+    display.printf("%02d/%02d/%04d", time.tm_mday,
+                               time.tm_mon+1,
+                               time.tm_year+1900);
 
     //TEMPO
     display.setCursor(55,47); 
     display.setTextSize(1);
-    display.print("22:59:20");
+    display.printf("%02d:%02d:%02d", time.tm_hour,
+                               time.tm_min,
+                               time.tm_sec);
 
 
     display.display();
 }
 
-void generarePagWIFI(){
+void generarePagWIFI(String ssid,String ip,bool ap,String commit){
     display.clearDisplay();
 
     //TITOLO
@@ -311,9 +313,18 @@ void generarePagWIFI(){
     //CORPO
 
     display.setTextSize(1);
-    display.println("\nssid : 5948753498729754925795873902");
-    display.println("id : 5748.9384.8284.8394");
-    display.println("commit : kendjso");
+    display.print("ssid : ");
+    display.println(ssid);
+    display.print("ip : ");
+    display.println(ip);
+    if(ap){
+        display.setCursor(23,display.getCursorY());
+        display.println("[ACCES POINT]\n");
+    } else{
+        display.println("\n\n");
+    }
+    display.print("commit : ");
+    display.println(commit);
 
     display.display();
 }
@@ -362,7 +373,7 @@ void generarePagTEMP(float temp, float cpuTemp){
     display.display();
 }
 
-void generarePagGPS(){
+void generarePagGPS(float lat,float lon ,float alt,int8_t sat,String fix){
     display.clearDisplay();
     //TITOLO
     display.setCursor(46,0);   
@@ -378,11 +389,16 @@ void generarePagGPS(){
 
     display.setTextSize(1);
     display.println("\n");
-    display.println("Lat : 4563.6443");
-    display.println("Lon : 4536.5643");
-    display.println("Alt : 5434.5345");
-    display.println("Sat : 07");
-    display.println("Fix : 3");
+    display.print("Lat : ");
+    display.printf("%.4f\n", lat);
+    display.print("Lon : ");
+    display.printf("%.4f\n", lon);
+    display.print("Alt : ");
+    display.printf("%.4f\n", alt);
+    display.print("Sat : ");
+    display.println(sat);
+    display.print("Fix : ");
+    display.println(fix);
 
 
     display.display();

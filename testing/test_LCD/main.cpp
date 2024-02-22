@@ -4,6 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <LCD.h>
+#include <git_revision.h>
 
 #ifndef PRINTF 
   #ifdef DEBUG
@@ -24,9 +25,23 @@ typedef struct {
 
 SensorData data;
 
-//Disegno triangoli senza numeri con posizioni giuste
-    // display.drawTriangle(2,6,15,1,15,11,WHITE);
-    // display.drawTriangle(127,6,113,1,113,11,WHITE);
+//Dati prova
+
+    double angle = 0;
+
+    String ssid = "seleggiquestovuoldirechestafunzi";
+    String ip = "utt.oda.lma.inc";
+    bool ap = true;
+    String commit = "github/ottimo/ciao/bho//home";
+
+    float lat = 4623.4252;
+    float lon = 4636.5325;
+    float alt = 4735.6352;
+    int8_t sat = 5;
+    String fix = "04";
+
+    struct tm timeinfo;
+
 
 int valBottoneR = 0;
 int valBottoneL = 0;
@@ -50,7 +65,7 @@ uint64_t t4 = 0;
 uint64_t t5 = 0; //t per bussola
 uint64_t t6 = 0; //t per angolo
 
-double angle = 0;
+
 
 void setup() {
 
@@ -146,10 +161,8 @@ void loop() {
 
     uint16_t tAng = millis() - t6;
     if(actualPage == PAG_START && actualState == FIND){
-        if(tAng > 500 &&  !angleMov) {
+        if(tAng > 300 &&  !angleMov ) {
             angleMov = true;
-        }else if(1000 < tAng && angleMov){
-            angleMov = false;
             t6 = millis();
         }
 
@@ -196,10 +209,12 @@ void loop() {
                 }
                 break;
             case PAG_TIME:
-                generarePagTIME();
+                timeinfo.tm_hour = 10;
+
+                generarePagTIME(timeinfo);
                 break;
             case PAG_WIFI:
-                generarePagWIFI();
+                generarePagWIFI(ssid,ip,ap,__GIT_COMMIT__);
                 break;
             case PAG_TEMP:
                 analog = analogRead(TEMP_SENSOR);
@@ -210,7 +225,7 @@ void loop() {
                 generarePagTEMP(data.temp, data.cpuTemp);
                 break;
             case PAG_GPS:
-                generarePagGPS();
+                generarePagGPS(lat,lon,alt,sat,fix);
                 break;        
         }
     }

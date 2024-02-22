@@ -62,8 +62,7 @@ const unsigned char term [] PROGMEM = {
 
 bool lcdInit(uint8_t);
 
-//funzione per nscheda
-int getNScheda();
+
 
 void generarePagINTRO();
 
@@ -79,12 +78,12 @@ void generarePagREADY();
 void generarePagFIND();
 void discCerchio(double);
 
-void generarePagTIME();
+void generarePagTIME(struct tm);
 
-void generarePagWIFI();
+void generarePagWIFI(String,String,bool,String);
 
 void generarePagTEMP(float, float);
 
-void generarePagGPS();
+void generarePagGPS(float,float,float,int8_t,String);
 
 #endif
