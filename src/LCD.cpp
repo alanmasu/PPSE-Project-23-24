@@ -291,7 +291,7 @@ void generarePagTIME(struct tm time){
     display.display();
 }
 
-void generarePagWIFI(String ssid,String ip,bool ap,String commit){
+void generarePagWIFI(String ssid,String ip,bool ap){
     display.clearDisplay();
 
     //TITOLO
@@ -323,8 +323,7 @@ void generarePagWIFI(String ssid,String ip,bool ap,String commit){
     } else{
         display.println("\n\n");
     }
-    display.print("commit : ");
-    display.println(commit);
+    display.print("DOWN : Start AP mode");
 
     display.display();
 }
@@ -385,21 +384,56 @@ void generarePagGPS(float lat,float lon ,float alt,int8_t sat,String fix){
     display.setCursor(1,0); 
     display.write("6");
 
+    //FRECCIA DI DESTRA
+    display.drawTriangle(111,6,97,1,97,11,WHITE);
+    display.setCursor(116,0); 
+    display.write("8\n");
+
 //CORPO
 
     display.setTextSize(1);
-    display.println("\n");
+    display.print("\n");
+    display.setCursor(20,display.getCursorY());
     display.print("Lat : ");
     display.printf("%.4f\n", lat);
+    display.setCursor(20,display.getCursorY());
     display.print("Lon : ");
     display.printf("%.4f\n", lon);
+    display.setCursor(20,display.getCursorY());
     display.print("Alt : ");
     display.printf("%.4f\n", alt);
+    display.setCursor(20,display.getCursorY());
     display.print("Sat : ");
     display.println(sat);
+    display.setCursor(20,display.getCursorY());
     display.print("Fix : ");
     display.println(fix);
+    
 
 
+    display.display();
+}
+
+void generarePagINFO(String rp2040comm,String espcomm){
+    display.clearDisplay();
+                
+    display.setTextSize(2);
+
+    //FRECCIA DI SINISTRA
+    display.drawTriangle(15,6,28,1,28,11,WHITE);
+    display.setCursor(1,0); 
+    display.write("7");
+    
+
+    //TITOLO
+    display.setCursor(40,0);   
+    display.println("INFO");          
+
+    //CORPO
+    display.setTextSize(1);
+    display.println("\nRP2040 commit:");
+    display.println(rp2040comm);
+    display.println("\nESP commit:");
+    display.println(espcomm);
     display.display();
 }

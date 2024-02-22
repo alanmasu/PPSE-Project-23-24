@@ -80,10 +80,12 @@ void discCerchio(double);
 
 void generarePagTIME(struct tm);
 
-void generarePagWIFI(String,String,bool,String);
+void generarePagWIFI(String,String,bool);
 
 void generarePagTEMP(float, float);
 
 void generarePagGPS(float,float,float,int8_t,String);
+
+void generarePagINFO(String,String);
 
 #endif

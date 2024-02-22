@@ -14,7 +14,7 @@
   #endif
 #endif
 
-enum Page_t {PAG_INTRO = 0,PAG_CAL, PAG_START,PAG_TIME,PAG_WIFI,PAG_TEMP,PAG_GPS};
+enum Page_t {PAG_INTRO = 0,PAG_CAL, PAG_START,PAG_TIME,PAG_WIFI,PAG_TEMP,PAG_GPS,PAG_INFO};
 
 enum State_t {IDLE=0,CALIBRATING,WAYPOINT,FIND};
 
@@ -132,8 +132,8 @@ void loop() {
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
         actualPage = (Page_t)(actualPage + 1);
         updatePage = true;
-        if(actualPage>6){
-            actualPage=PAG_GPS;
+        if(actualPage>7){
+            actualPage=PAG_INFO;
         }
     }else if(!digitalRead(BTN_LEFT) != valBottoneL && !digitalRead(BTN_LEFT)){
         actualPage = (Page_t)(actualPage - 1);
@@ -214,7 +214,7 @@ void loop() {
                 generarePagTIME(timeinfo);
                 break;
             case PAG_WIFI:
-                generarePagWIFI(ssid,ip,ap,__GIT_COMMIT__);
+                generarePagWIFI(ssid,ip,ap);
                 break;
             case PAG_TEMP:
                 analog = analogRead(TEMP_SENSOR);
@@ -227,6 +227,9 @@ void loop() {
             case PAG_GPS:
                 generarePagGPS(lat,lon,alt,sat,fix);
                 break;        
+            case PAG_INFO:
+                generarePagINFO(__GIT_COMMIT__,__GIT_COMMIT__);
+                break;
         }
     }
 
@@ -285,6 +288,11 @@ void loop() {
             }
                     
            break;
+        case PAG_WIFI:
+            if(btnDWEdge){
+            
+            }
+            break;
     }
     
 
