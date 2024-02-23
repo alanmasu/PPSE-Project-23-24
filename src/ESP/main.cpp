@@ -133,6 +133,7 @@ void setup(){
     Serial.begin(115200);
     Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
     Serial.printf("Built on %s at %s\n", __DATE__, __TIME__);
+    Serial.printf("ApplictionRecord_t size: %d\n", sizeof(ApplicationRecord_t));
   #else
     SERIAL_TO_USE.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
     SERIAL_TO_USE.printf("Built on %s at %s\n", __DATE__, __TIME__);
@@ -201,6 +202,7 @@ void loop() {
   myWebServer.run();
   if(millis() - t0 > 1000){
     t0 = millis();
+    Serial.printf("Packet recived:\n\ttemp: %f,\n\tcpuTemp: %f,\n\tgotoAP: %d", applicationRecord.temp, applicationRecord.cpuTemp, applicationRecord.gotoAP);
     wifiConfig.ap = myWebServer.getAPMode();
     if(!wifiConfig.ap){
       if(WiFi.status() == WL_CONNECTED){

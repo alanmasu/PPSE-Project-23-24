@@ -437,6 +437,12 @@ void getGpsData(int* sats, float* gpsSpeed, float* gpsAltitude, float* gpsHdop){
     *gpsHdop = atof(gpsGGAData.hdop);
 }
 
+void getGpsFixData(uint8_t* fix, uint8_t* sats, float* hdop){
+    *fix  = atoi(gpsGSAData.fix);
+    *hdop = atof(gpsGSAData.hdop);
+    *sats = atoi(gpsGGAData.sats);
+}
+
 GpsGGAData_t* getGGAData(void){
     return &gpsGGAData;
 }
@@ -461,27 +467,21 @@ GpsVTGData_t* getVTGData(void){
 }
 
 //Modifica da verificare
-    void popWaypoint_t(WayPoint_t& waypoint){
-        waypoint.timeInfo = getRMCData()->timeInfo;
-        waypoint.latitude = atof(getRMCData()->latitude);
-        waypoint.longitude = atof(getRMCData()->longitude);
-        waypoint.altitude = atof(getRMCData()->altitude);
-        waypoint.sats = atoi(getGGAData()->sats);
-        waypoint.fix = getGGAData()->fix;
-        waypoint.fixType = atoi(getGSAData()->fix);
-        waypoint.hdop = atof(getGGAData()->hdop); 
-    }
+void popWaypoint_t(WayPoint_t& waypoint){
+    waypoint.timeInfo = getRMCData()->timeInfo;
+    waypoint.latitude = atof(getRMCData()->latitude);
+    waypoint.longitude = atof(getRMCData()->longitude);
+    waypoint.altitude = atof(getRMCData()->altitude);
+    waypoint.sats = atoi(getGGAData()->sats);
+    waypoint.fix = getGGAData()->fix;
+    waypoint.fixType = atoi(getGSAData()->fix);
+    waypoint.hdop = atof(getGGAData()->hdop); 
+}
 
-    void saveWayPoint(WayPoint_t& lastWaypoint){
-        popWaypoint_t(lastWaypoint);
-    }
+void saveWayPoint(WayPoint_t& lastWaypoint){
+    popWaypoint_t(lastWaypoint);
+}
 
-WayPoint_t actualPoint;
-    WayPoint_t firstWayPoint;
-    float temp;
-    bool waypointsaved;
-    bool gotoAP;
-    float cpuTemp;
 
 
 

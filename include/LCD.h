@@ -126,16 +126,16 @@ void cancBussola();
 void generarePagSTART();
 void generarePagREADY();
 void generarePagFIND();
-void discCerchio(double);
+void discCerchio(double angle);
 
 void generarePagTIME(struct tm);
 
-void generarePagWIFI(String,String,bool);
+void generarePagWIFI(String ssid, String ip, bool ap);
 
-void generarePagTEMP(float, float);
+void generarePagTEMP(float temp, float cpuTemp);
 
-void generarePagGPS(float,float,float,int8_t,int);
+void generarePagGPS(float lat, float lon, float alt, int8_t sats, int fixType);
 
-void generarePagINFO(String,String);
+void generarePagINFO(String commit, String ESPCommit);
 
 #endif

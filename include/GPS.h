@@ -141,6 +141,7 @@ void gpsParseData(const char* packet);
 
 //Getter functions
 void getGpsData(int* sats, float* speed, float* altitude, float* hdop);
+void getGpsFixData(uint8_t* fix, uint8_t* sats, float* hdop);
 GpsGGAData_t* getGGAData(void);
 GpsRMCData_t* getRMCData(void);
 GpsGSAData_t* getGSAData(void);
