@@ -225,7 +225,7 @@ void loop() {
                 generarePagTEMP(data.temp, data.cpuTemp);
                 break;
             case PAG_GPS:
-                generarePagGPS(lat,lon,alt,sat,fix);
+                generarePagGPS(lat,lon,alt,sat,fix.toInt());
                 break;        
             case PAG_INFO:
                 generarePagINFO(__GIT_COMMIT__,__GIT_COMMIT__);

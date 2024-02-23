@@ -1,4 +1,14 @@
+#include <Arduino.h>
+#include <Stream.h>
 #include "common.h"
+
+#ifdef ESP8266
+    #include <ESP8266WiFi.h>
+#else
+    #include <WiFi.h>
+#endif
+
+
 
 String splitString(String str, char sep, int index) {
   /* str a' la variabile di tipo String che contiene il valore da splittare
@@ -30,4 +40,3 @@ String splitString(String str, char sep, int index) {
   
 //   return d;
 // }
- 

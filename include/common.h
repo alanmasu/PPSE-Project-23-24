@@ -2,21 +2,27 @@
 #define __COMMON_H__
 
 #include <Arduino.h>
+#include <Stream.h>
 #include <IPAddress.h>
+
+#ifdef ESP8266
+  #include <ESP8266WiFi.h>
+#else
+  #include <WiFi.h>
+#endif
 
 String splitString(String str, char sep, int index);
 
-
 typedef struct {
     int8_t sats;
-    struct tm timeInfo_1;
-    float latitude_1;                      
-    float longitude_1;
-    float altitude_1;  
-    bool fix_1;
-    int fix_num_1;
-    float hdop_1;
-    float temp_t;
+    struct tm timeInfo;
+    float latitude;                      
+    float longitude;
+    float altitude;
+    bool fix;
+    int fixType;
+    float hdop;
+    float temp;
 } WayPoint_t; 
 
 typedef struct{
@@ -29,12 +35,10 @@ typedef struct{
 } ApplicationRecord_t;
 
 typedef struct{
-    char ssid[32];
+    char ssid[33];
     IPAddress ipAddress;
-    bool ap;   
+    bool ap;
+    char commitHash[9];
 }WiFiConfiguration_t;
-
-
-
 
 #endif

@@ -462,14 +462,14 @@ GpsVTGData_t* getVTGData(void){
 
 //Modifica da verificare
     void popWaypoint_t(WayPoint_t& waypoint){
-        waypoint.timeInfo_1 = getRMCData()->timeInfo;
-        waypoint.latitude_1 = atof(getRMCData()->latitude);
-        waypoint.longitude_1 = atof(getRMCData()->longitude);
-        waypoint.altitude_1 = atof(getRMCData()->altitude);
-        int8_t sats = atoi(getGGAData()->sats);
-        waypoint.fix_1 = getGGAData()->fix;
-        waypoint.fix_num_1 = atoi(getGSAData()->fix);
-        waypoint.hdop_1 = atof(getGGAData()->hdop); 
+        waypoint.timeInfo = getRMCData()->timeInfo;
+        waypoint.latitude = atof(getRMCData()->latitude);
+        waypoint.longitude = atof(getRMCData()->longitude);
+        waypoint.altitude = atof(getRMCData()->altitude);
+        waypoint.sats = atoi(getGGAData()->sats);
+        waypoint.fix = getGGAData()->fix;
+        waypoint.fixType = atoi(getGSAData()->fix);
+        waypoint.hdop = atof(getGGAData()->hdop); 
     }
 
     void saveWayPoint(WayPoint_t& lastWaypoint){

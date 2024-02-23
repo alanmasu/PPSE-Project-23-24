@@ -282,7 +282,7 @@ void loop() {
             case PAG_TIME:
                 
 
-                generarePagTIME(actualWaypoint.timeInfo_1);
+                generarePagTIME(actualWaypoint.timeInfo);
                 
                 break;
             case PAG_WIFI:
@@ -298,7 +298,11 @@ void loop() {
                 break;
             case PAG_GPS:
                 
-                generarePagGPS(actualWaypoint.latitude_1,actualWaypoint.longitude_1,actualWaypoint.altitude_1,actualWaypoint.sats,actualWaypoint.fix_num_1);
+                generarePagGPS( actualWaypoint.latitude,
+                                actualWaypoint.longitude,
+                                actualWaypoint.altitude,
+                                actualWaypoint.sats,
+                                actualWaypoint.fixType);
                 
                 break;        
             case PAG_INFO:
@@ -338,7 +342,7 @@ void loop() {
                         actualState=WAYPOINT;
                         updatePage = true;
                         saveWayPoint(lastWaypoint);
-                        Serial.print(lastWaypoint.longitude_1);
+                        Serial.print(lastWaypoint.longitude);
                         apprec.waypointsaved=true;
 
                         tone(BUZZER,500,100);
