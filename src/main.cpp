@@ -340,6 +340,8 @@ void loop() {
                         saveWayPoint(lastWaypoint);
                         Serial.print(lastWaypoint.longitude_1);
                         apprec.waypointsaved=true;
+
+                        tone(BUZZER,500,100);
                     }
                     break;
 
@@ -349,13 +351,16 @@ void loop() {
 
                         actualState=FIND;
                         updatePage = true;
+
+                        
+
                     }
                     if(btnUPEdge && apprec.waypointsaved){
                         actualState = IDLE;
                         updatePage = true;
                         apprec.waypointsaved=false;
                     
-                        tone(BUZZER,500,1000);
+                        tone(BUZZER,200,500);
                     
                     }
                     break;
@@ -366,6 +371,7 @@ void loop() {
                         actualState = WAYPOINT;
                         updatePage = true;
                     }
+
                     break;
             }
                     
