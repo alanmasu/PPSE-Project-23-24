@@ -167,8 +167,9 @@ void setup(){
 }
 
 void loop() {
+  size_t bytesRead = 0;
   if(SERIAL_TO_USE.available() > 0){
-    SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord));
+    bytesRead = SERIAL_TO_USE.readBytes((char*)&applicationRecord, sizeof(applicationRecord));
   }
   #ifdef ESP32
     //Reading button on GPIO0

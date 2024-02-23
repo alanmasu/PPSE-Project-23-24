@@ -1,16 +1,17 @@
 #include <Arduino.h>
 #include <ESPModule.h>
 
-ESPModule::ESPModule(SerialUART& serialToUse, int baudrate) : 
-serialToUse(serialToUse), 
-baudrate(baudrate){
+ESPModule::ESPModule(int baudrate, pin_size_t txPin, pin_size_t rxPin){
+    this->baudrate = baudrate;
+    this->txPin = txPin;
+    this->rxPin = rxPin;
 }
 
 WiFiConfiguration_t ESPModule::getData(){
     WiFiConfiguration_t wifiConfig;
     String str;
-    while(serialToUse.available()>0) {
-        str = serialToUse.readStringUntil('\n');
+    while(serialToUse->available()>0) {
+        str = serialToUse->readStringUntil('\n');
     }
     if(str != ""){
         memcpy(wifiConfig.ssid, splitString(str, ';', 0).c_str(), 32);
@@ -23,12 +24,14 @@ WiFiConfiguration_t ESPModule::getData(){
     return wifiConfig;
 }
 
-void ESPModule::begin(uint8_t txPin, uint8_t rxPin){
-    serialToUse.setTX(txPin);
-    serialToUse.setRX(rxPin);
-    serialToUse.begin(this->baudrate);
+void ESPModule::begin(SerialUART* serialToUse){
+    this->serialToUse = serialToUse;
+    serialToUse->setTX(txPin);
+    serialToUse->setRX(rxPin);
+    serialToUse->begin(baudrate);
+    serialToUse->begin(this->baudrate);
 }
 
-void ESPModule::sendData(const ApplicationRecord_t& applicationRecord){
-    serialToUse.write((byte*)&applicationRecord, sizeof(applicationRecord));
+void ESPModule::sendData(const ApplicationRecord_t* applicationRecord){
+    this->serialToUse->write((uint8_t*)applicationRecord, sizeof(applicationRecord));
 }
