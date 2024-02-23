@@ -10,7 +10,7 @@ class ESPModule {
     public:
         ESPModule(int baudrate = 115200, pin_size_t txPin = 4, pin_size_t rxPin = 5);
         void begin(SerialUART* serialToUse);
-        WiFiConfiguration_t getData();
+        void getData(WiFiConfiguration_t& wifiConfig);
         void sendData(const ApplicationRecord_t* data);
     private:
         SerialUART* serialToUse;

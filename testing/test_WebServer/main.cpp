@@ -133,5 +133,5 @@ void loop() {
     t2 = millis();
     Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
   }
-  wifiConfig = myESP.getData();
+  myESP.getData(wifiConfig);
 }

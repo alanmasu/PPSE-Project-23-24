@@ -7,8 +7,7 @@ ESPModule::ESPModule(int baudrate, pin_size_t txPin, pin_size_t rxPin){
     this->rxPin = rxPin;
 }
 
-WiFiConfiguration_t ESPModule::getData(){
-    WiFiConfiguration_t wifiConfig;
+void ESPModule::getData(WiFiConfiguration_t& wifiConfig){
     String str;
     while(serialToUse->available()>0) {
         str = serialToUse->readStringUntil('\n');
@@ -17,11 +16,9 @@ WiFiConfiguration_t ESPModule::getData(){
         memcpy(wifiConfig.ssid, splitString(str, ';', 0).c_str(), 32);
         wifiConfig.ssid[32] = '\0';
         String ip = splitString(str, ';', 1);
-        // wifiConfig.ipAddress = IPAddress();
         wifiConfig.ipAddress.fromString(ip);
         wifiConfig.ap = splitString(str, ';', 2).toInt();
     }
-    return wifiConfig;
 }
 
 void ESPModule::begin(SerialUART* serialToUse){
