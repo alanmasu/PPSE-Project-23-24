@@ -35,7 +35,8 @@ typedef struct{
 typedef struct{
     char ssid[33];
     IPAddress ipAddress;
-    bool ap;   
+    bool ap;
+    char commitHash[9];
 }WiFiConfiguration_t;
 
 #endif

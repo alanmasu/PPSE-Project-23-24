@@ -19,6 +19,7 @@ void ESPModule::getData(WiFiConfiguration_t& wifiConfig){
         String ip = splitString(str, ';', 1);
         wifiConfig.ipAddress.fromString(ip);
         wifiConfig.ap = splitString(str, ';', 2).toInt();
+        memcpy(wifiConfig.commitHash, splitString(str, ';', 3).c_str(), 8);
     }
 }
 

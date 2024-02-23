@@ -125,6 +125,7 @@ void handleWaypointList(){
 
 
 void setup(){
+  SERIAL_TO_USE.begin(115200);
   #ifdef ESP8266
     ESP.wdtEnable(3000);
   #endif
@@ -132,8 +133,17 @@ void setup(){
     Serial.begin(115200);
     Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
     Serial.printf("Built on %s at %s\n", __DATE__, __TIME__);
+  #else
+    SERIAL_TO_USE.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
+    SERIAL_TO_USE.printf("Built on %s at %s\n", __DATE__, __TIME__);
   #endif
-  SERIAL_TO_USE.begin(115200);
+
+  //Copio il commit hash per versioning
+  memcpy(wifiConfig.commitHash, __GIT_COMMIT__, 8);
+  wifiConfig.commitHash[8] = '\0';
+
+
+
 
   // FILESYSTEM INIT
   startFilesystem();
@@ -209,9 +219,16 @@ void loop() {
     // SERIAL_TO_USE.write((uint8_t*)&wifiConfig, sizeof(wifiConfig));
     SERIAL_TO_USE.printf("%s;", wifiConfig.ssid);
     SERIAL_TO_USE.print(wifiConfig.ipAddress);
-    SERIAL_TO_USE.printf(";%d\n", wifiConfig.ap);
+    SERIAL_TO_USE.printf(";%d;%s\n", wifiConfig.ap, wifiConfig.commitHash);
     #ifdef ESP32
-      Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
+      Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d, bytes readed: %d, commit: %s\n",  wifiConfig.ssid, 
+                                                                                          wifiConfig.ipAddress[0], 
+                                                                                          wifiConfig.ipAddress[1], 
+                                                                                          wifiConfig.ipAddress[2], 
+                                                                                          wifiConfig.ipAddress[3], 
+                                                                                          wifiConfig.ap,
+                                                                                          bytesRead,
+                                                                                          wifiConfig.commitHash);
     #endif
   }
 }

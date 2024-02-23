@@ -85,10 +85,9 @@ void setup() {
   display.display();
 
   //Initialize the ESP01 pins
+  myESP.begin();
   pinMode(ESP_EN, OUTPUT);
   digitalWrite(ESP_EN, HIGH);
-
-  myESP.begin();
 
 }
 
@@ -131,7 +130,7 @@ void loop() {
   if(millis() - t2 > 1000) {
     myESP.sendData(&applicationRecord);
     t2 = millis();
-    Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap);
+    Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d, ESP Commit: %s\n", wifiConfig.ssid, wifiConfig.ipAddress[0], wifiConfig.ipAddress[1], wifiConfig.ipAddress[2], wifiConfig.ipAddress[3], wifiConfig.ap, wifiConfig.commitHash);
   }
   myESP.getData(wifiConfig);
 }
