@@ -29,7 +29,7 @@ uint64_t t2 = 0;      //Timer for ESP UART
 ApplicationRecord_t applicationRecord;
 WiFiConfiguration_t wifiConfig;
 
-ESPModule myESP(115200, ESP_RX, ESP_TX);
+ESPModule myESP(115200, Serial1, ESP_RX, ESP_TX);
 
 void setup() {
 
@@ -88,7 +88,7 @@ void setup() {
   pinMode(ESP_EN, OUTPUT);
   digitalWrite(ESP_EN, HIGH);
 
-  myESP.begin(&Serial1);
+  myESP.begin();
 
 }
 
