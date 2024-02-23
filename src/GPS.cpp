@@ -27,12 +27,16 @@
 // #else
 
 // #endif
-
-#ifdef DEBUG
-    #define PRINTF(...) Serial1.printf(__VA_ARGS__)
+#if GPS_DEBUG == 1
+    #ifdef DEBUG
+        #define PRINTF(...) Serial1.printf(__VA_ARGS__)
+    #else
+        #define PRINTF(...) Serial.printf(__VA_ARGS__)
+    #endif
 #else
-    #define PRINTF(...) Serial.printf(__VA_ARGS__)
+    #define PRINTF(...)
 #endif
+    
 
 volatile uint8_t gpsUartBuffer[RX_BUFFER_SIZE];  //!< GPS UART RX buffer
 volatile bool gpsStringEnd = false;            //!< Flag for end of string
@@ -455,6 +459,30 @@ GpsGPGSVData_t* getGPGSVData(void){
 GpsVTGData_t* getVTGData(void){
     return &gpsVTGData;
 }
+
+//Modifica da verificare
+    void popWaypoint_t(WayPoint_t& waypoint){
+        waypoint.timeInfo_1 = getRMCData()->timeInfo;
+        waypoint.latitude_1 = atof(getRMCData()->latitude);
+        waypoint.longitude_1 = atof(getRMCData()->longitude);
+        waypoint.altitude_1 = atof(getRMCData()->altitude);
+        int8_t sats = atoi(getGGAData()->sats);
+        waypoint.fix_1 = getGGAData()->fix;
+        waypoint.fix_num_1 = atoi(getGSAData()->fix);
+        waypoint.hdop_1 = atof(getGGAData()->hdop); 
+    }
+
+    void saveWayPoint(WayPoint_t& lastWaypoint){
+        popWaypoint_t(lastWaypoint);
+    }
+
+WayPoint_t actualPoint;
+    WayPoint_t firstWayPoint;
+    float temp;
+    bool waypointsaved;
+    bool gotoAP;
+    float cpuTemp;
+
 
 
 /*! @} */ // GPS_Module

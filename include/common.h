@@ -11,7 +11,8 @@ typedef struct {
     int8_t sats;
     struct tm timeInfo_1;
     float latitude_1;                      
-    float longitude_1;  
+    float longitude_1;
+    float altitude_1;  
     bool fix_1;
     int fix_num_1;
     float hdop_1;
@@ -22,7 +23,9 @@ typedef struct{
     WayPoint_t actualPoint;
     WayPoint_t firstWayPoint;
     float temp;
+    bool waypointsaved;
     bool gotoAP;
+    float cpuTemp;
 } ApplicationRecord_t;
 
 typedef struct{

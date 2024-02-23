@@ -26,6 +26,10 @@ typedef struct {
   float temp;
 } SensorData;
 
+WayPoint_t actualWaypoint;
+WayPoint_t lastWaypoint;
+ApplicationRecord_t apprec;
+
 SensorData data;
 
 //Dati prova
@@ -36,12 +40,6 @@ SensorData data;
     String ip = "utt.oda.lma.inc";
     bool ap = true;
     String commit = "github/ottimo/ciao/bho//home";
-
-    float lat = 4623.4252;
-    float lon = 4636.5325;
-    float alt = 4735.6352;
-    int8_t sat = 5;
-    String fix = "04";
 
     struct tm timeinfo;
 
@@ -138,12 +136,15 @@ void setup() {
       Serial1.begin(115200) ;
     #else
       Serial.begin(115200) ;
-      while(!Serial);
+      //while(!Serial);
     #endif
     
     digitalWrite(GPS_EN,LOW);
 
     pinMode(ALIVE_LED,OUTPUT);
+
+    //BUZZER
+    pinMode(BUZZER,OUTPUT);
 
 }
 
@@ -154,11 +155,6 @@ void loop() {
     //GPS
 
     char *sentence;
-    // int pos_termine=0;
-    // int M=600;
-    // String buffer[M];
-
-    //PRINTF("%d",Serial2.available());
 
     //Controllo se ci sono caratteri
     if(Serial2.available()>0){
@@ -169,35 +165,31 @@ void loop() {
             countpacket++;
         }
     }
-    // while(Serial2.available()>0){
-    //   Pacchetto stringhe da passare
-    //   for(int i=0;i<12;++i){
-    //     String sentence = Serial2.readStringUntil('\n');
-    //     PRINTF("%s",sentence);
-    //     infoGPS+=sentence;
-    //   }
-    // }
 
     if(countpacket == 12){
       Serial1.println(infoGPS);
     }
-
-    
   
     int analog;
     float vTempSensor;
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
-        actualPage = (Page_t)(actualPage + 1);
-        updatePage = true;
-        if(actualPage>7){
+        if(actualPage!=7){
+            actualPage = (Page_t)(actualPage + 1);
+        }else{
+
             actualPage=PAG_INFO;
         }
-    }else if(!digitalRead(BTN_LEFT) != valBottoneL && !digitalRead(BTN_LEFT)){
-        actualPage = (Page_t)(actualPage - 1);
         updatePage = true;
-        if(actualPage<0){
+        Serial.printf("PAG Count:%d", (int)actualPage);
+    }else if(!digitalRead(BTN_LEFT) != valBottoneL && !digitalRead(BTN_LEFT)){
+
+        if(actualPage != 0){
+            actualPage = (Page_t)(actualPage - 1);
+        }else{
             actualPage=PAG_INTRO;
         }
+        updatePage = true;
+        Serial.printf("PAG Count:%d", (int)actualPage);
     }
     
     valBottoneR = !digitalRead(BTN_RIGHT);
@@ -230,17 +222,23 @@ void loop() {
         
         if(countpacket==12){
 
-          PRINTF("\nParsing...");
-          char tmp[1024];
-          strncpy(tmp, infoGPS.c_str(), 1024);
-          gpsParseData(tmp);
-        //   gpsParseData(infoGPS.c_str());      
-          infoGPS = "";
-          countpacket = 0;
-          
-          PRINTF("\nOK...\n");
+            PRINTF("\nParsing...");
+            char tmp[1024];
+            strncpy(tmp, infoGPS.c_str(), 1024);
+            gpsParseData(tmp);
+            popWaypoint_t(actualWaypoint);
+
+            //Modifica da provare
+            
+            //gpsParseData(infoGPS.c_str());      
+            infoGPS = "";
+            countpacket = 0;
+            
+            PRINTF("\nOK...\n");
 
         }
+    
+        
           
         updatePage = false;
         t3= millis();
@@ -282,9 +280,10 @@ void loop() {
                 }
                 break;
             case PAG_TIME:
-                timeinfo.tm_hour = 10;
+                
 
-                generarePagTIME(timeinfo);
+                generarePagTIME(actualWaypoint.timeInfo_1);
+                
                 break;
             case PAG_WIFI:
                 generarePagWIFI(ssid,ip,ap);
@@ -298,7 +297,9 @@ void loop() {
                 generarePagTEMP(data.temp, data.cpuTemp);
                 break;
             case PAG_GPS:
-                generarePagGPS(lat,lon,alt,sat,fix);
+                
+                generarePagGPS(actualWaypoint.latitude_1,actualWaypoint.longitude_1,actualWaypoint.altitude_1,actualWaypoint.sats,actualWaypoint.fix_num_1);
+                
                 break;        
             case PAG_INFO:
                 generarePagINFO(__GIT_COMMIT__,__GIT_COMMIT__);
@@ -307,6 +308,7 @@ void loop() {
     }
 
     //MACCHINA A STATI
+
     bool btnDWEdge = false;
     bool btnUPEdge = false;
     if(!digitalRead(BTN_DOWN) != valBottoneD && !digitalRead(BTN_DOWN)){
@@ -332,9 +334,12 @@ void loop() {
             switch(actualState){
                 case IDLE:
 
-                    if(btnDWEdge){
+                    if(btnDWEdge && !apprec.waypointsaved /*&& gpfix && hdop<5*/){
                         actualState=WAYPOINT;
                         updatePage = true;
+                        saveWayPoint(lastWaypoint);
+                        Serial.print(lastWaypoint.longitude_1);
+                        apprec.waypointsaved=true;
                     }
                     break;
 
@@ -345,9 +350,13 @@ void loop() {
                         actualState=FIND;
                         updatePage = true;
                     }
-                    if(btnUPEdge){
+                    if(btnUPEdge && apprec.waypointsaved){
                         actualState = IDLE;
                         updatePage = true;
+                        apprec.waypointsaved=false;
+                    
+                        tone(BUZZER,500,1000);
+                    
                     }
                     break;
 
@@ -368,6 +377,7 @@ void loop() {
             break;
     }
     
+    //FINE MACCHINA A STATI
 
     uint16_t dt = millis() - t0;
     if(dt < 1000) {
@@ -389,4 +399,3 @@ void loop() {
     }
 
 }
-

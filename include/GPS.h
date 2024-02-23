@@ -36,6 +36,7 @@
 #include <PSEBoard.h>
 #include <common.h>
 
+#define GPS_DEBUG 0
 
 /*!
     @defgroup   GPS_Module GPS
@@ -146,6 +147,11 @@ GpsGSAData_t* getGSAData(void);
 GpsGPGSVData_t* getGPGSVData(void);
 GpsGLGSVData_t* getGLGSVData(void);
 GpsVTGData_t* getVTGData(void);
+
+//modifica da verificare
+    void popWaypoint_t(WayPoint_t& waypoint);
+    void saveWayPoint(WayPoint_t& lastWaypoint);
+
 
 /*! @} */ //End of GPS_Module
 

@@ -134,7 +134,7 @@ void generarePagWIFI(String,String,bool);
 
 void generarePagTEMP(float, float);
 
-void generarePagGPS(float,float,float,int8_t,String);
+void generarePagGPS(float,float,float,int8_t,int);
 
 void generarePagINFO(String,String);
 

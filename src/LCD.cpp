@@ -362,7 +362,7 @@ void generarePagTEMP(float temp, float cpuTemp){
     display.display();
 }
 
-void generarePagGPS(float lat,float lon ,float alt,int8_t sat,String fix){
+void generarePagGPS(float lat,float lon ,float alt,int8_t sat,int fix){
     display.clearDisplay();
     //TITOLO
     display.setCursor(46,0);   
@@ -397,6 +397,18 @@ void generarePagGPS(float lat,float lon ,float alt,int8_t sat,String fix){
     display.println(sat);
     display.setCursor(20,display.getCursorY());
     display.print("Fix : ");
+    switch (fix){
+        case 0:
+        case 1:
+            display.println("NO FIX");
+            break;
+        case 2:
+            display.println("2D");
+            break;
+        case 3:
+            display.println("3D");
+            break;
+    }
     display.println(fix);
     
 
