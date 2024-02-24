@@ -117,6 +117,8 @@ void handleWaypointList(){
   obj["fixType"] = applicationRecord.firstWayPoint.fixType;
   obj["hdop"] = applicationRecord.firstWayPoint.hdop;
   obj["temp"] = applicationRecord.temp;
+  obj["waypointAdded"] = applicationRecord.waypointsaved;
+
 
   String reply;
   serializeJson(doc, reply);

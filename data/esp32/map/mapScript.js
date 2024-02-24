@@ -125,7 +125,7 @@ function reflashWaypoints(waypoints){
   if(waypoints !== undefined && length in waypoints){
     if(waypoints.length > 0){
       let actualPoint = waypoints[0];
-      if(actualPoint.fix == true && actualPoint.hdop < 5){
+      if(actualPoint.fix == true && actualPoint.hdop < 5 && actualPoint.waypointAdded){
         firstWaypoint.setLatLng(actualPoint.actualCoordinates);
         firstWaypointCircle.setLatLng(actualPoint.actualCoordinates);
         if(!firstWaypointAdded){
@@ -133,6 +133,12 @@ function reflashWaypoints(waypoints){
           firstWaypoint.bindPopup("<b>First way point</b>");
           firstWaypointCircle.addTo(map);
           firstWaypointAdded = true;
+        }
+      }else if(actualPoint.waypointAdded == false){
+        if(firstWaypointAdded){
+          firstWaypoint.removeFrom(map);
+          firstWaypointCircle.removeFrom(map);
+          firstWaypointAdded = false;
         }
       }
     }
