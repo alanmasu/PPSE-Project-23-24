@@ -9,16 +9,8 @@ html {
 .container {
   display: flex;
   justify-content: center;
-  min-height: calc(100vh - 6rem);
-  /*padding: 1rem 0;*/
-  max-width: 860px;
-  /*padding: 40px;*/
+  height: 85vh;
 }    
-
-/*.container {*/
-/*  max-width: 860px;*/
-/*  padding: 40px;*/
-/*}*/
 
 .field{
   display: inline;
