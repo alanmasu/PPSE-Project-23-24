@@ -1,15 +1,8 @@
 #ifndef __BUSSOLA_H__
 #define __BUSSOLA_H__
-
-#ifndef CALIBRATION_SAMPLES
 #define CALIBRATION_SAMPLES 300
-#endif
-#ifndef CALIBRATION_TIME_STEP
 #define CALIBRATION_TIME_STEP 10
-#endif
-#ifndef PRE_CALIBRATION_WAIT
-#define PRE_CALIBRATION_WAIT 5000
-#endif
+#define PRE_CALIBRATION_WAIT 10
 
 #include <Wire.h>
 #include <Arduino.h>
@@ -43,8 +36,6 @@ class Bussola {
         Axis_t accelerometer_offset;
         float magnetometer_degree_offset;
         CalibrationStatus_t calibrationStatus;
-        bool calibration_in_progress;
-        bool calibration_done;
     };
     Adafruit_LSM303_Accel_Unified _acc;
     Adafruit_LSM303_Mag_Unified _mag;
@@ -54,6 +45,8 @@ class Bussola {
     unsigned int calibration_step;
     float magnetometer_degree;
     Axis_t accelerometer;
+    bool classInitialized;
+    bool drdy, drdy_pre;
 
     float getDegree(float mag_x, float mag_y, float mag_z);
     bool isStateEntry();
@@ -65,8 +58,10 @@ class Bussola {
     void stopCalibration();
     CalibrationStatus_t getCalibrationStatus();
     bool init();
+    bool isClassInitialized();
     void update();
     float getDegree();
+    Axis_t getAccelerometerData();
 };
 
 
