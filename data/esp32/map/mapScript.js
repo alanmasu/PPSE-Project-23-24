@@ -31,9 +31,8 @@ let map = L.map('map');
 let actualWaypointAdded = false;
 let firstWaypointAdded = false;
 
-function loadMap(){
-  let actualPoint = getActualPosition();
-  // actualPoint = {time: 1708361330, actualCoordinates: [46.06820112646287, 11.149819112494852], fix: 1, fixType: 3, sats: 6, hdop: 4.7, temp: 23.7};
+
+function centerMap(actualPoint){
   if(actualPoint === undefined){
     map.setView([46.075040938511776, 11.121374432172466], 12);
   }else{
@@ -47,25 +46,32 @@ function loadMap(){
       map.setView([46.075040938511776, 11.121374432172466], 12);
     }
   }
+}
 
+function loadMap(){
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
+  getActualPosition(true);
+
   setInterval(getActualPosition, 1000);
   setInterval(getWaypointList, 1000);
 }
 
-function getActualPosition(){
+function getActualPosition(center = false){
   let rec = new XMLHttpRequest();
   rec.open('GET', "/actualPosition");
   rec.send();
   rec.onload = () => {
     if(rec.responseType == ""){
-      //console.log(rec.responseText);
       let jsonObj = JSON.parse(rec.responseText);
-      // console.log("actualPoint: ", jsonObj);
-      reflashCurrentPosition(jsonObj);
+      if(center){
+        console.log("Centering map");
+        centerMap(jsonObj);
+      }else{
+        reflashCurrentPosition(jsonObj);
+      }
     }else{
       console.error("error type");
       console.log("type:", rec.responseType);
@@ -82,7 +88,6 @@ function getWaypointList(){
   rec.onload = () => {
     if(rec.responseType == ""){
       let jsonObj = JSON.parse(rec.responseText);
-      console.log("waypoints: ", jsonObj);
       reflashWaypoints(jsonObj);
     }else{
       console.error("error type");
@@ -100,11 +105,6 @@ function randomNumber(min, max){
 
 function reflashCurrentPosition(actualPoint){
   // actualPoint = {time: 1708361330, actualCoordinates: [46.06820112646287, 11.149819112494852], fix: true, fixType: 3, sats: 6, hdop: 5.76, temp: 23.7};
-  // actualPoint.hdop = randomNumber(4.5, 5.5);
-  // actualPoint.actualCoordinates[0] = randomNumber(46.06820112646287, 46.0685693929914);
-  // actualPoint.actualCoordinates[1] = randomNumber(11.149819112494852, 11.149845609819108);
-  // console.log(actualPoint.actualCoordinates);
-  // console.log(actualPoint);
   if(actualPoint !== undefined){
     // console.log("actualPoint defined");
     if(actualPoint.fix == true && actualPoint.hdop < 5){
@@ -121,14 +121,11 @@ function reflashCurrentPosition(actualPoint){
 }
 
 function reflashWaypoints(waypoints){
-//For now only one waypoint is added
   // waypoints = [{time: 1708361330, coordinates: [46.066757288599504, 11.149665173034434], fix: true, fixType: 3, sats: 6, hdop: 4.7, temp: 23.7}];
-  console.log(waypoints);
   if(waypoints !== undefined && length in waypoints){
     if(waypoints.length > 0){
       let actualPoint = waypoints[0];
       if(actualPoint.fix == true && actualPoint.hdop < 5){
-        // map.panTo(actualPoint.actualCoordinates);
         firstWaypoint.setLatLng(actualPoint.actualCoordinates);
         firstWaypointCircle.setLatLng(actualPoint.actualCoordinates);
         if(!firstWaypointAdded){
