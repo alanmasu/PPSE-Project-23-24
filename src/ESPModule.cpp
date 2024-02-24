@@ -7,6 +7,7 @@ ESPModule::ESPModule(int baudrate, SerialUART& serialToUse, pin_size_t txPin, pi
     this->txPin = txPin;
     this->rxPin = rxPin;
     this->enable = enable;
+    this->bufferQueue = 0;
 }
 
 void ESPModule::getData(WiFiConfiguration_t& wifiConfig){
@@ -35,5 +36,5 @@ void ESPModule::begin(){
 }
 
 void ESPModule::sendData(const ApplicationRecord_t* applicationRecord){
-    this->serialToUse.write((uint8_t*)applicationRecord, sizeof(applicationRecord));
+    this->serialToUse.write((uint8_t*)applicationRecord, sizeof(ApplicationRecord_t));
 }

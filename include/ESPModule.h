@@ -18,6 +18,7 @@ class ESPModule {
         pin_size_t txPin;
         pin_size_t rxPin;
         pin_size_t enable;
+        size_t bufferQueue;
 };
 
 
