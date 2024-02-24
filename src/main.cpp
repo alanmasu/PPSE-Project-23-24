@@ -143,6 +143,9 @@ void loop() {
         }
     }
 
+    //Lettura dati dal modulo ESP
+    myESP.getData(wifiConfig);
+    
     //Lettura pulsanti per cambio pagina
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
         if(actualPage!=7){
