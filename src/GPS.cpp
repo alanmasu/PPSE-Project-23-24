@@ -469,9 +469,9 @@ GpsVTGData_t* getVTGData(void){
 //Modifica da verificare
 void popWaypoint_t(WayPoint_t& waypoint){
     waypoint.timeInfo = getRMCData()->timeInfo;
-    waypoint.latitude = atof(getRMCData()->latitude);
-    waypoint.longitude = atof(getRMCData()->longitude);
-    waypoint.altitude = atof(getRMCData()->altitude);
+    waypoint.latitude = atof(getGGAData()->latitude);
+    waypoint.longitude = atof(getGGAData()->longitude);
+    waypoint.altitude = atof(getGGAData()->altitude);
     waypoint.sats = atoi(getGGAData()->sats);
     waypoint.fix = getGGAData()->fix;
     waypoint.fixType = atoi(getGSAData()->fix);

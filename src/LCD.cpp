@@ -312,8 +312,8 @@ void generarePagWIFI(String ssid,String ip,bool ap){
         display.println("[ACCES POINT]\n");
     } else{
         display.println("\n\n");
+        display.print("DOWN : Start AP ...");
     }
-    display.print("DOWN : Start AP ...");
 
     display.display();
 }

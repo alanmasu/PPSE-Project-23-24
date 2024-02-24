@@ -34,9 +34,6 @@ ApplicationRecord_t applicationRecord;
 
 WiFiConfiguration_t wifiConfig;
 
-StaticJsonDocument<200> doc;
-
-
 uint64_t t0 = 0;
 
 bool btnStatus = false;
@@ -89,6 +86,7 @@ void handleMainEndpoint() {
 }
 
 void handleActualPosition(){
+  StaticJsonDocument<200> doc;
   WebServerClass* webRequest = myWebServer.getRequest();
   
   doc["time"] = mktime(&applicationRecord.actualPoint.timeInfo);
@@ -106,7 +104,9 @@ void handleActualPosition(){
 }
 
 void handleWaypointList(){
+  StaticJsonDocument<200> doc;
   WebServerClass* webRequest = myWebServer.getRequest();
+  
   JsonArray waypoints = doc.to<JsonArray>();
   JsonObject obj = waypoints.createNestedObject();
   obj["time"] = mktime(&applicationRecord.firstWayPoint.timeInfo);
@@ -185,14 +185,14 @@ void loop() {
   #ifdef ESP32
     //Reading button on GPIO0
     btnStatus = !digitalRead(0);
-    if(btnStatus != btnStatusP && btnStatus || applicationRecord.gotoAP){
+    if(btnStatus != btnStatusP && btnStatus  || (applicationRecord.gotoAP && !myWebServer.getAPMode()) ){
       myWebServer.startAP();
       Serial.println("Starting AP");
     }
     btnStatusP = btnStatus;
   #else
     ESP.wdtFeed();
-    if(applicationRecord.gotoAP){
+    if(applicationRecord.gotoAP && !myWebServer.getAPMode()){
       myWebServer.startAP();
       Serial.println("Starting AP");
     }
@@ -202,7 +202,7 @@ void loop() {
   myWebServer.run();
   if(millis() - t0 > 1000){
     t0 = millis();
-    Serial.printf("Packet recived:\n\ttemp: %f,\n\tcpuTemp: %f,\n\tgotoAP: %d", applicationRecord.temp, applicationRecord.cpuTemp, applicationRecord.gotoAP);
+    // Serial.printf("Packet recived:\n\ttemp: %f,\n\tcpuTemp: %f,\n\tgotoAP: %d", applicationRecord.temp, applicationRecord.cpuTemp, applicationRecord.gotoAP);
     wifiConfig.ap = myWebServer.getAPMode();
     if(!wifiConfig.ap){
       if(WiFi.status() == WL_CONNECTED){
@@ -223,13 +223,12 @@ void loop() {
     SERIAL_TO_USE.print(wifiConfig.ipAddress);
     SERIAL_TO_USE.printf(";%d;%s\n", wifiConfig.ap, wifiConfig.commitHash);
     #ifdef ESP32
-      Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d, bytes readed: %d, commit: %s\n",  wifiConfig.ssid, 
+      Serial.printf("SSID: %s, IP: %d.%d.%d.%d, AP: %d, commit: %s\n",  wifiConfig.ssid, 
                                                                                           wifiConfig.ipAddress[0], 
                                                                                           wifiConfig.ipAddress[1], 
                                                                                           wifiConfig.ipAddress[2], 
                                                                                           wifiConfig.ipAddress[3], 
                                                                                           wifiConfig.ap,
-                                                                                          bytesRead,
                                                                                           wifiConfig.commitHash);
     #endif
   }
