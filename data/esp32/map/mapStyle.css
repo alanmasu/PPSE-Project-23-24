@@ -3,7 +3,7 @@
  * that contains the map. 
  */
  /* Map Iframe class */
-.mapFrame { 
+ .mapFrame { 
   height: 80%;  /*altezza*/
   width: 100%;  /*larghezza*/
 }
@@ -29,4 +29,8 @@
   .map-box {
     width: 100%;
   }
+}
+
+.map-article{
+  margin: 10px;
 }
