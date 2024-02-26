@@ -24,8 +24,10 @@ bool lcdInit(uint8_t address){
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);        // Draw white text
-    display.setCursor(40,30);             
-    display.println("Hello PSE!");
+    display.setCursor(0,16);             
+    display.println("Waiting USB Serial...");
+    display.setCursor(0,40);             
+    display.println("or Press UP to start");
     display.display();
     return true;
 } 
@@ -440,5 +442,18 @@ void generarePagINFO(String rp2040comm,String espcomm){
     display.println(rp2040comm);
     display.println("\nESP commit:");
     display.println(espcomm);
+    display.display();
+}
+
+void generarePagError(String error){
+    display.clearDisplay();
+    display.setTextSize(2);
+
+    display.setCursor(37,0);   
+    display.println("ERROR"); 
+
+    display.setTextSize(1);
+    display.setCursor(0,30);
+    display.println(error);
     display.display();
 }

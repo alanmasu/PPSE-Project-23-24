@@ -138,4 +138,6 @@ void generarePagGPS(float lat, float lon, float alt, int8_t sats, int fixType);
 
 void generarePagINFO(String commit, String ESPCommit);
 
+void generarePagError(String error);
+
 #endif
