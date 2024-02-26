@@ -63,6 +63,10 @@ void setup() {
     pinMode(BTN_LEFT,INPUT);
     pinMode(BTN_DOWN,INPUT);
 
+    //Inizializzazione dell'autoritenuta
+    pinMode(BUCK_EN, OUTPUT);
+    digitalWrite(BUCK_EN, HIGH);
+
     delay(10);
 
     //Wait for serial port to be ready
@@ -79,11 +83,6 @@ void setup() {
             break;
         }
     } 
-
-
-    //Inizializzazione dell'autoritenuta
-    pinMode(BUCK_EN, OUTPUT);
-    digitalWrite(BUCK_EN, HIGH);
 
     //Initialize the temperature sensor
     analogReadResolution(ADC_BITS);
@@ -203,6 +202,7 @@ void loop() {
                         updatePage = true;
                         saveWayPoint(applicationRecord.firstWayPoint);
                         Serial.print(applicationRecord.firstWayPoint.longitude);
+                        applicationRecord.firstWayPoint.temp = applicationRecord.temp;
                         applicationRecord.waypointsaved=true;
                         tone(BUZZER,500,100);
                     }

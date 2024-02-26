@@ -96,6 +96,7 @@ void handleActualPosition(){
   doc["fix"] = applicationRecord.actualPoint.fix;
   doc["fixType"] = applicationRecord.actualPoint.fixType;
   doc["hdop"] = applicationRecord.actualPoint.hdop;
+  doc["sats"] = applicationRecord.actualPoint.sats;
   doc["temp"] = applicationRecord.temp;
 
   String reply;
@@ -116,7 +117,8 @@ void handleWaypointList(){
   obj["fix"] = applicationRecord.firstWayPoint.fix;
   obj["fixType"] = applicationRecord.firstWayPoint.fixType;
   obj["hdop"] = applicationRecord.firstWayPoint.hdop;
-  obj["temp"] = applicationRecord.temp;
+  obj["temp"] = applicationRecord.firstWayPoint.temp;
+  obj["sats"] = applicationRecord.firstWayPoint.sats;
   obj["waypointAdded"] = applicationRecord.waypointsaved;
 
 
