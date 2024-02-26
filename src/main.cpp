@@ -63,6 +63,18 @@ void setup() {
     pinMode(BTN_LEFT,INPUT);
     pinMode(BTN_DOWN,INPUT);
 
+    //Inizializzazione dell'autoritenuta
+    pinMode(BUCK_EN, OUTPUT);
+    digitalWrite(BUCK_EN, HIGH);
+
+    //Initialize the OLED display
+    Wire.setSDA(I2C0_SDA);
+    Wire.setSCL(I2C0_SCL);
+
+    if(!lcdInit(SCREEN_ADDRESS)){
+        Serial.println(F("SSD1306 allocation failed"));
+    }
+
     delay(10);
 
     //Wait for serial port to be ready
@@ -80,21 +92,9 @@ void setup() {
         }
     } 
 
-
-    //Inizializzazione dell'autoritenuta
-    pinMode(BUCK_EN, OUTPUT);
-    digitalWrite(BUCK_EN, HIGH);
-
     //Initialize the temperature sensor
     analogReadResolution(ADC_BITS);
 
-    //Initialize the OLED display
-    Wire.setSDA(I2C0_SDA);
-    Wire.setSCL(I2C0_SCL);
-
-    if(!lcdInit(SCREEN_ADDRESS)){
-        Serial.println(F("SSD1306 allocation failed"));
-    }
     delay(2000);
 
     Serial.printf("Git info: %s %s\n", __GIT_COMMIT__, __GIT_REMOTE_URL__);
@@ -119,6 +119,11 @@ void setup() {
 }
 
 String infoGPS;
+
+//LCD Error menagement
+bool screenShowError = false;
+String screenError = "";
+uint64_t tError = 0;
 
 void loop() {
     //Variabili ADC
@@ -198,20 +203,37 @@ void loop() {
                     uint8_t sats;
                     float hdop;
                     getGpsFixData(&fix, &sats, &hdop);
-                    if(btnDWEdge && !applicationRecord.waypointsaved && fix && hdop < 5){
-                        actualState=WAYPOINT;
-                        updatePage = true;
-                        saveWayPoint(applicationRecord.firstWayPoint);
-                        Serial.print(applicationRecord.firstWayPoint.longitude);
-                        applicationRecord.waypointsaved=true;
-                        tone(BUZZER,500,100);
+                    if(btnDWEdge && !applicationRecord.waypointsaved){
+                        if(fix && hdop < 5){
+                            actualState=WAYPOINT;
+                            updatePage = true;
+                            saveWayPoint(applicationRecord.firstWayPoint);
+                            Serial.print(applicationRecord.firstWayPoint.longitude);
+                            applicationRecord.firstWayPoint.temp = applicationRecord.temp;
+                            applicationRecord.waypointsaved=true;
+                            tone(BUZZER,500,100);
+                        }else{
+                            screenShowError = true;
+                            screenError = "No GPS Fix";
+                            tone(BUZZER,200,1000);
+                            updatePage = true;
+                            tError = millis();
+                        }
                     }
                     break;
 
                 case WAYPOINT:
                     if(btnDWEdge){
-                        actualState = FIND;
-                        updatePage  = true;
+                        // if(bussola.getCalibrationState() != DONE){
+                        //     screenShowError = true;
+                        //     screenError = "Calibrate the compass";
+                        //     tone(BUZZER,200,1000);
+                        //     updatePage = true;
+                        //     tError = millis();
+                        // }else{
+                            actualState = FIND;
+                            updatePage  = true;
+                        // }
                     }
                     if(btnUPEdge && applicationRecord.waypointsaved){
                         actualState = IDLE;
@@ -278,60 +300,67 @@ void loop() {
         updatePage = false;
         t4 = millis();
         //Generazione pagine
-        switch (actualPage){
-            case PAG_INTRO:
-                generarePagINTRO();
-                break;
-            case PAG_CAL:
-                switch(actualState){
-                    case FIND:
-                    case WAYPOINT:
-                    case IDLE:
-                        generarePagCAL1();
-                        break;
-                    case CALIBRATING:
-                        generarePagCAL2();
-                        break;
-                }
-                break;
-            case PAG_START:
-                switch (actualState){
-                    case IDLE:
-                    case CALIBRATING:
-                        generarePagSTART();
-                        break;
-                    case WAYPOINT:                   
-                        generarePagREADY();
-                        break;
-                    case FIND:
-                        generarePagFIND();
-                        if(angleMov){
-                            angle=angle+10;
-                        }
-                        discCerchio(angle);
-                        break;
-                }
-                break;
-            case PAG_TIME:
-                generarePagTIME(applicationRecord.actualPoint.timeInfo);                
-                break;
-            case PAG_WIFI:
-                ip = String(wifiConfig.ipAddress[0]) + "." + String(wifiConfig.ipAddress[1]) + "." + String(wifiConfig.ipAddress[2]) + "." + String(wifiConfig.ipAddress[3]);
-                generarePagWIFI(wifiConfig.ssid,ip,wifiConfig.ap);
-                break;
-            case PAG_TEMP:
-                generarePagTEMP(applicationRecord.temp, applicationRecord.cpuTemp);
-                break;
-            case PAG_GPS:
-                generarePagGPS( applicationRecord.actualPoint.latitude,
-                                applicationRecord.actualPoint.longitude,
-                                applicationRecord.actualPoint.altitude,
-                                applicationRecord.actualPoint.sats,
-                                applicationRecord.actualPoint.fixType);
-                break;        
-            case PAG_INFO:
-                generarePagINFO(__GIT_COMMIT__,wifiConfig.commitHash);
-                break;
+        if(screenShowError){
+            if(millis() - tError > 5000){
+                screenShowError = false;
+            }
+            generarePagError(screenError);
+        }else{
+            switch (actualPage){
+                case PAG_INTRO:
+                    generarePagINTRO();
+                    break;
+                case PAG_CAL:
+                    switch(actualState){
+                        case FIND:
+                        case WAYPOINT:
+                        case IDLE:
+                            generarePagCAL1();
+                            break;
+                        case CALIBRATING:
+                            generarePagCAL2();
+                            break;
+                    }
+                    break;
+                case PAG_START:
+                    switch (actualState){
+                        case IDLE:
+                        case CALIBRATING:
+                            generarePagSTART();
+                            break;
+                        case WAYPOINT:                   
+                            generarePagREADY();
+                            break;
+                        case FIND:
+                            generarePagFIND();
+                            if(angleMov){
+                                angle=angle+10;
+                            }
+                            discCerchio(angle);
+                            break;
+                    }
+                    break;
+                case PAG_TIME:
+                    generarePagTIME(applicationRecord.actualPoint.timeInfo);                
+                    break;
+                case PAG_WIFI:
+                    ip = String(wifiConfig.ipAddress[0]) + "." + String(wifiConfig.ipAddress[1]) + "." + String(wifiConfig.ipAddress[2]) + "." + String(wifiConfig.ipAddress[3]);
+                    generarePagWIFI(wifiConfig.ssid,ip,wifiConfig.ap);
+                    break;
+                case PAG_TEMP:
+                    generarePagTEMP(applicationRecord.temp, applicationRecord.cpuTemp);
+                    break;
+                case PAG_GPS:
+                    generarePagGPS( applicationRecord.actualPoint.latitude,
+                                    applicationRecord.actualPoint.longitude,
+                                    applicationRecord.actualPoint.altitude,
+                                    applicationRecord.actualPoint.sats,
+                                    applicationRecord.actualPoint.fixType);
+                    break;        
+                case PAG_INFO:
+                    generarePagINFO(__GIT_COMMIT__,wifiConfig.commitHash);
+                    break;
+            }
         }
     }
 

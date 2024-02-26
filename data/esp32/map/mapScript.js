@@ -104,16 +104,24 @@ function randomNumber(min, max){
 }
 
 function reflashCurrentPosition(actualPoint){
-  // actualPoint = {time: 1708361330, actualCoordinates: [46.06820112646287, 11.149819112494852], fix: true, fixType: 3, sats: 6, hdop: 5.76, temp: 23.7};
+  // actualPoint = {time: 1708361330, actualCoordinates: [46.06820112646287, 11.149819112494852], fix: true, fixType: 3, sats: 6, hdop: 4.7, temp: 23.7};
   if(actualPoint !== undefined){
     // console.log("actualPoint defined");
     if(actualPoint.fix == true && actualPoint.hdop < 5){
       // console.log("actualPoint has fix");
       map.panTo(actualPoint.actualCoordinates);
       actualWaypoint.setLatLng(actualPoint.actualCoordinates);
+      actualWaypoint.bindPopup("\
+        <b>You are Here!</b>\
+        <br>\
+        Lat: " + actualPoint.actualCoordinates[0]  + "<br>\
+        Long: " + actualPoint.actualCoordinates[1] + "<br>\
+        Temp: " + actualPoint.temp + "<br>\
+        HDOP: " + actualPoint.hdop + "<br>\
+        Sats: " + actualPoint.sats
+      );
       if(!actualWaypointAdded){
         actualWaypoint.addTo(map);
-        actualWaypoint.bindPopup("<b>You are Here!</b>");
         actualWaypointAdded = true;
       }
     }
@@ -121,16 +129,24 @@ function reflashCurrentPosition(actualPoint){
 }
 
 function reflashWaypoints(waypoints){
-  // waypoints = [{time: 1708361330, coordinates: [46.066757288599504, 11.149665173034434], fix: true, fixType: 3, sats: 6, hdop: 4.7, temp: 23.7}];
+  // waypoints = [{time: 1708361330, actualCoordinates: [46.0688739974261, 11.149632306379223], fix: true, fixType: 3, sats: 6, hdop: 4.7, temp: 23.7, waypointAdded:true }];
   if(waypoints !== undefined && length in waypoints){
     if(waypoints.length > 0){
       let actualPoint = waypoints[0];
       if(actualPoint.fix == true && actualPoint.hdop < 5 && actualPoint.waypointAdded){
         firstWaypoint.setLatLng(actualPoint.actualCoordinates);
         firstWaypointCircle.setLatLng(actualPoint.actualCoordinates);
+        firstWaypoint.bindPopup("\
+          <b>First Waypoint!</b>\
+          <br>\
+          Lat: " + actualPoint.actualCoordinates[0]  + "<br>\
+          Long: " + actualPoint.actualCoordinates[1] + "<br>\
+          Temp: " + actualPoint.temp + "<br>\
+          HDOP: " + actualPoint.hdop + "<br>\
+          Sats: " + actualPoint.sats
+        );
         if(!firstWaypointAdded){
           firstWaypoint.addTo(map);
-          firstWaypoint.bindPopup("<b>First way point</b>");
           firstWaypointCircle.addTo(map);
           firstWaypointAdded = true;
         }

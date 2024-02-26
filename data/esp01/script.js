@@ -14,10 +14,6 @@ function onLoad(){
   }
   reflesh();
   setInterval(reflesh, 1000);
-  document.getElementById("ledsForm").addEventListener("submit", function (e) {
-    e.preventDefault();
-    setLeds();
-  });
 }
 
 function toggleLed() {
@@ -26,18 +22,6 @@ function toggleLed() {
   });
   
   fetch('/led?' + pars )                // Do the request
-  .then(response => response.text())    // Parse the response 
-  .then(text => {                       // DO something with response
-    console.log(text);
-  });
-}
-
-function toggleLeds() {
-  const pars = new URLSearchParams({
-    val:  document.getElementById('toggle-leds').checked ? '1' : '0'
-  });
-  
-  fetch('/rgbLed?' + pars )                // Do the request
   .then(response => response.text())    // Parse the response 
   .then(text => {                       // DO something with response
     console.log(text);
@@ -69,54 +53,3 @@ function reflesh(){
     }
   };
 }
-
-function setLeds(){
-  let form = document.getElementById('ledsForm');
-  let formData = new FormData(form);
-  // console.log(Object.fromEntries(formData));
-  let values = Object.fromEntries(formData);
-  console.log(values)
-  if (isNaN(values.count) || values.count == ""){
-    alert("Numero di LED deve essere numerico");
-    console.log("imput non numerico")
-  }else{
-    // console.log(formData);
-    let toSend = "color=" + parseInt(values.color.substring(1), 16) + "&count=" + values.count + "\n";
-    let rec = new XMLHttpRequest();
-    rec.open('POST', "/setLeds", true);
-    rec.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    rec.setRequestHeader("Content-length", toSend.length);
-    rec.send(toSend);
-    // rec.send(formData);
-  }
-  
-}
-// function buttonClick(element){
-//     //Modifico me stesso
-//     element.dataset.state = element.dataset.state == '1' ? '0': '1' ;
-//     let rec = new XMLHttpRequest();
-//     let list = [];
-//     let msg = "";
-//     let buttons = document.querySelectorAll(".led-button");
-//     if(buttons !== undefined){
-//         console.log("buttons", buttons);
-//         if(buttons.length > 0){
-//             buttons.forEach(function(btn){
-//                 list.push({pin: btn.dataset.pin, state: btn.dataset.state});
-//             });
-//         }
-//     }
-//     console.log("list", list);
-//     let jsonObj = {leds: list};
-//     msg = JSON.stringify(jsonObj);
-//     rec.open('POST', "/ledState", true);
-//     rec.setRequestHeader('Content-type', 'application/json');
-//     rec.send(msg);
-// }
-
-// function saveConfig(element){
-//     let rec = new XMLHttpRequest();
-//     rec.open('GET', "/saveConfig");
-//     rec.send();
-//     // window.location.href = "/saveConfig";
-// }
