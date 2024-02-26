@@ -130,7 +130,16 @@ void handleWaypointList(){
 
 void setup(){
   SERIAL_TO_USE.begin(115200);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  #ifdef ESP32
+    pinMode(0, INPUT);
+    btnStatus = !digitalRead(0);
+    btnStatusP = btnStatus;    
+  #endif
+
   #ifdef ESP8266
+    digitalWrite(LED_BUILTIN, HIGH);
     ESP.wdtEnable(3000);
   #endif
   #ifdef ESP32
@@ -147,14 +156,19 @@ void setup(){
   memcpy(wifiConfig.commitHash, __GIT_COMMIT__, 8);
   wifiConfig.commitHash[8] = '\0';
 
-
-
-
   // FILESYSTEM INIT
   startFilesystem();
 
   // Try to connect to flash stored SSID, start AP if fails after timeout
-  IPAddress myIP = myWebServer.startWiFi(15000, "ESP8266_AP", "123456789" );
+  myWebServer.setAP("PPSE-23_AP", "123456789");
+
+  #ifdef ESP8266
+    IPAddress myIP = myWebServer.startWiFi(15000, true, [](){
+        ESP.wdtFeed();
+    } );
+  #else
+    IPAddress myIP = myWebServer.startWiFi(15000, true);
+  #endif
 
   // Add custom page handlers to webserver
   myWebServer.addHandler("/mainPageEndpoint", HTTP_GET, handleMainEndpoint);
@@ -170,15 +184,6 @@ void setup(){
     SERIAL_TO_USE.println(F("Open /edit page to view and edit files"));
     SERIAL_TO_USE.println(F("Open /update page to upload firmware and filesystem updates"));
   }
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  #ifdef ESP32
-    pinMode(0, INPUT);
-    btnStatus = !digitalRead(0);
-    btnStatusP = btnStatus;
-  #else 
-    digitalWrite(LED_BUILTIN, HIGH);
-  #endif
 }
 
 void loop() {
