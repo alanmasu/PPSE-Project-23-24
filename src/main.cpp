@@ -84,12 +84,12 @@ void setup() {
     }
 
     //Inizializzazione bussola
-    compass.init();
-    compass.magnetometerRollingRoundig(true);
-    compass.accelerometerRollingRoundig(true);
+    // compass.init();
+    // compass.magnetometerRollingRoundig(true);
+    // compass.accelerometerRollingRoundig(true);
 
     //Inizializzazione led WS2812
-    led.init();
+    // led.init();
 
     delay(10);
 
@@ -173,7 +173,7 @@ void loop() {
     myESP.getData(wifiConfig);
     
     //Aggiornamento dati Bussola
-    compass.update();
+    // compass.update();
 
     //Lettura pulsanti per cambio pagina
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
@@ -214,15 +214,15 @@ void loop() {
             if(btnDWEdge){
                 actualState = CALIBRATING;
                 updatePage = true;
-                compass.calibrate_accelerometer();
+                // compass.calibrate_accelerometer();
             }
-            if(compass.getAccelerometerCalibrationStatus() == CALIBRATION_DONE && compass.getMagnetometerCalibrationStatus() == NOT_CALIBRATED) {
-                compass.calibrate_magnetometer();
-            }
-            led.ledShowCalibration(compass.getCalibrationStatus() == CALIBRATION_DONE, compass.getMagnetometerCalibrationStatus() == CALIBRATION_IN_PROGRESS);
-            if(compass.getCalibrationStatus() == CALIBRATION_DONE) {
-                actualState = IDLE;
-            }
+            // if(compass.getAccelerometerCalibrationStatus() == CALIBRATION_DONE && compass.getMagnetometerCalibrationStatus() == NOT_CALIBRATED) {
+            //     compass.calibrate_magnetometer();
+            // }
+            // led.ledShowCalibration(compass.getCalibrationStatus() == CALIBRATION_DONE, compass.getMagnetometerCalibrationStatus() == CALIBRATION_IN_PROGRESS);
+            // if(compass.getCalibrationStatus() == CALIBRATION_DONE) {
+            //     actualState = IDLE;
+            // }
             break;
         case PAG_START:
             switch(actualState){
@@ -249,16 +249,16 @@ void loop() {
 
                 case WAYPOINT:
                     if(btnDWEdge){
-                        if(compass.getCalibrationStatus() != CALIBRATION_DONE){
-                            screenShowError = true;
-                            screenError = "Calibrate the compass";
-                            tone(BUZZER,200,1000);
-                            updatePage = true;
-                            tError = millis();
-                        }else{
+                        // if(compass.getCalibrationStatus() != CALIBRATION_DONE){
+                            // screenShowError = true;
+                            // screenError = "Calibrate the compass";
+                            // tone(BUZZER,200,1000);
+                            // updatePage = true;
+                            // tError = millis();
+                        // }else{
                             actualState = FIND;
                             updatePage  = true;
-                        }
+                        // }
                     }
                     if(btnUPEdge && applicationRecord.waypointsaved){
                         actualState = IDLE;
@@ -406,8 +406,8 @@ void loop() {
         switch(actualState) {
             case IDLE:
             case WAYPOINT:
-                getGpsFixData(&fix, &sats, &hdop);
-                led.ledShowFix(fix && hdop < 5);
+                // getGpsFixData(&fix, &sats, &hdop);
+                // led.ledShowFix(fix && hdop < 5);
                 break;
             case FIND:
                 temp_cos = applicationRecord.firstWayPoint.longitude - applicationRecord.actualPoint.longitude;
