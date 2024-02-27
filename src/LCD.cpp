@@ -42,7 +42,7 @@ int cerchiX(int ragg,double anglerad){
 }
 
 int cerchiY(int ragg,double anglerad){
-    int y = round(32 + ragg * sin(anglerad));
+    int y = round(32 - ragg * sin(anglerad));
     return y;
 }
 

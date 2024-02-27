@@ -4,6 +4,8 @@
 #include <LCD.h>
 #include <GPS.h>
 #include <ESPModule.h>
+#include <PSEBoard_WS2812.h>
+#include <Bussola.h>
 
 #ifndef PRINTF 
   #ifdef DEBUG
@@ -23,9 +25,14 @@ WiFiConfiguration_t wifiConfig;
 //ESPModule 
 ESPModule myESP(115200, Serial1, ESP_RX, ESP_TX, ESP_EN);
 
-//Dati prova
-    double angle = 0;
+//WS2812 Led
+PSEBoard_WS2812 led;
 
+//Bussola
+Bussola compass;
+
+//Angolo direzione (puntato)
+double angle = 0;
 
 int valBottoneR = 0;
 int valBottoneL = 0;
@@ -67,13 +74,20 @@ void setup() {
     pinMode(BUCK_EN, OUTPUT);
     digitalWrite(BUCK_EN, HIGH);
 
-    //Initialize the OLED display
+    //Initialize the OLED display and Bussola
     Wire.setSDA(I2C0_SDA);
     Wire.setSCL(I2C0_SCL);
 
+    //Inizializzazione display
     if(!lcdInit(SCREEN_ADDRESS)){
         Serial.println(F("SSD1306 allocation failed"));
     }
+
+    //Inizializzazione bussola
+    // compass.init();
+
+    //Inizializzazione led WS2812
+    led.init();
 
     delay(10);
 
@@ -151,6 +165,9 @@ void loop() {
     //Lettura dati dal modulo ESP
     myESP.getData(wifiConfig);
     
+    //Aggiornamento dati Bussola
+    // compass.update();
+
     //Lettura pulsanti per cambio pagina
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
         if(actualPage!=7){
@@ -204,7 +221,7 @@ void loop() {
                     float hdop;
                     getGpsFixData(&fix, &sats, &hdop);
                     if(btnDWEdge && !applicationRecord.waypointsaved){
-                        if(fix && hdop < 5){
+                        // if(fix && hdop < 5){
                             actualState=WAYPOINT;
                             updatePage = true;
                             saveWayPoint(applicationRecord.firstWayPoint);
@@ -212,13 +229,13 @@ void loop() {
                             applicationRecord.firstWayPoint.temp = applicationRecord.temp;
                             applicationRecord.waypointsaved=true;
                             tone(BUZZER,500,100);
-                        }else{
-                            screenShowError = true;
-                            screenError = "No GPS Fix";
-                            tone(BUZZER,200,1000);
-                            updatePage = true;
-                            tError = millis();
-                        }
+                        // }else{
+                        //     screenShowError = true;
+                        //     screenError = "No GPS Fix";
+                        //     tone(BUZZER,200,1000);
+                        //     updatePage = true;
+                        //     tError = millis();
+                        // }
                     }
                     break;
 
@@ -333,10 +350,7 @@ void loop() {
                             break;
                         case FIND:
                             generarePagFIND();
-                            if(angleMov){
-                                angle=angle+10;
-                            }
-                            discCerchio(angle);
+                            discCerchio(angle + 90);
                             break;
                     }
                     break;
@@ -377,12 +391,31 @@ void loop() {
         }
     }
 
-    //Simulazione Angolo
-    uint16_t tAng = millis() - t6;
-    if(actualPage == PAG_START && actualState == FIND){
-        if(tAng > 300 &&  !angleMov ) {
-            angleMov = true;
-            t6 = millis();
+    float temp_cos, temp_sin;
+
+    // Aggiornamento Led
+    uint16_t tLed = millis() - t6;
+    if(tLed > 1000) {
+        t6 = millis();
+        switch(actualState) {
+            case IDLE:
+            case CALIBRATING:
+            case WAYPOINT:
+                break;
+            case FIND:
+                temp_cos = applicationRecord.firstWayPoint.longitude - applicationRecord.actualPoint.longitude;
+                temp_sin = applicationRecord.firstWayPoint.latitude - applicationRecord.actualPoint.latitude;
+                if(temp_cos >= 0 && temp_sin >= 0) {
+                    angle = asin(abs(temp_cos)) * 180.0 / PI;
+                } else if(temp_cos >= 0 && temp_sin < 0) {
+                    angle = 90 + asin(abs(temp_sin)) * 180.0 / PI;
+                } else if(temp_cos < 0 && temp_sin >= 0) {
+                    angle = 270 + asin(abs(temp_sin)) * 180.0 / PI;
+                } else if(temp_cos < 0 && temp_sin < 0) {
+                    angle = 180 + asin(abs(temp_cos)) * 180.0 / PI;
+                }
+                led.ledShowDirection(angle);
+                break;
         }
     }
 }
