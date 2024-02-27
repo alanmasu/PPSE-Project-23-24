@@ -84,7 +84,9 @@ void setup() {
     }
 
     //Inizializzazione bussola
-    // compass.init();
+    compass.init();
+    compass.magnetometerRollingRoundig(true);
+    compass.accelerometerRollingRoundig(true);
 
     //Inizializzazione led WS2812
     led.init();
@@ -140,6 +142,11 @@ String screenError = "";
 uint64_t tError = 0;
 
 void loop() {
+    //Variabili temporanee
+    uint8_t fix;
+    uint8_t sats;
+    float hdop;
+    float temp_cos, temp_sin, temp_ipo;
     //Variabili ADC
     int analog;
     float vTempSensor;
@@ -166,7 +173,7 @@ void loop() {
     myESP.getData(wifiConfig);
     
     //Aggiornamento dati Bussola
-    // compass.update();
+    compass.update();
 
     //Lettura pulsanti per cambio pagina
     if(!digitalRead(BTN_RIGHT) != valBottoneR && !digitalRead(BTN_RIGHT)){
@@ -207,21 +214,22 @@ void loop() {
             if(btnDWEdge){
                 actualState = CALIBRATING;
                 updatePage = true;
+                compass.calibrate_accelerometer();
             }
-            // if(calibrationDone()){
-            //     actualState = IDLE;
-            // }
+            if(compass.getAccelerometerCalibrationStatus() == CALIBRATION_DONE && compass.getMagnetometerCalibrationStatus() == NOT_CALIBRATED) {
+                compass.calibrate_magnetometer();
+            }
+            led.ledShowCalibration(compass.getCalibrationStatus() == CALIBRATION_DONE, compass.getMagnetometerCalibrationStatus() == CALIBRATION_IN_PROGRESS);
+            if(compass.getCalibrationStatus() == CALIBRATION_DONE) {
+                actualState = IDLE;
+            }
             break;
         case PAG_START:
             switch(actualState){
                 case IDLE:
-                    //void getGpsFixData(uint8_t* fix, uint8_t* sats, float* hdop);
-                    uint8_t fix;
-                    uint8_t sats;
-                    float hdop;
                     getGpsFixData(&fix, &sats, &hdop);
                     if(btnDWEdge && !applicationRecord.waypointsaved){
-                        // if(fix && hdop < 5){
+                        if(fix && hdop < 5){
                             actualState=WAYPOINT;
                             updatePage = true;
                             saveWayPoint(applicationRecord.firstWayPoint);
@@ -229,28 +237,28 @@ void loop() {
                             applicationRecord.firstWayPoint.temp = applicationRecord.temp;
                             applicationRecord.waypointsaved=true;
                             tone(BUZZER,500,100);
-                        // }else{
-                        //     screenShowError = true;
-                        //     screenError = "No GPS Fix";
-                        //     tone(BUZZER,200,1000);
-                        //     updatePage = true;
-                        //     tError = millis();
-                        // }
+                        }else{
+                            screenShowError = true;
+                            screenError = "No GPS Fix";
+                            tone(BUZZER,200,1000);
+                            updatePage = true;
+                            tError = millis();
+                        }
                     }
                     break;
 
                 case WAYPOINT:
                     if(btnDWEdge){
-                        // if(bussola.getCalibrationState() != DONE){
-                        //     screenShowError = true;
-                        //     screenError = "Calibrate the compass";
-                        //     tone(BUZZER,200,1000);
-                        //     updatePage = true;
-                        //     tError = millis();
-                        // }else{
+                        if(compass.getCalibrationStatus() != CALIBRATION_DONE){
+                            screenShowError = true;
+                            screenError = "Calibrate the compass";
+                            tone(BUZZER,200,1000);
+                            updatePage = true;
+                            tError = millis();
+                        }else{
                             actualState = FIND;
                             updatePage  = true;
-                        // }
+                        }
                     }
                     if(btnUPEdge && applicationRecord.waypointsaved){
                         actualState = IDLE;
@@ -350,7 +358,7 @@ void loop() {
                             break;
                         case FIND:
                             generarePagFIND();
-                            discCerchio(angle + 90);
+                            discCerchio(-(angle - 90));
                             break;
                     }
                     break;
@@ -391,28 +399,28 @@ void loop() {
         }
     }
 
-    float temp_cos, temp_sin;
-
     // Aggiornamento Led
     uint16_t tLed = millis() - t6;
     if(tLed > 1000) {
         t6 = millis();
         switch(actualState) {
             case IDLE:
-            case CALIBRATING:
             case WAYPOINT:
+                getGpsFixData(&fix, &sats, &hdop);
+                led.ledShowFix(fix && hdop < 5);
                 break;
             case FIND:
                 temp_cos = applicationRecord.firstWayPoint.longitude - applicationRecord.actualPoint.longitude;
                 temp_sin = applicationRecord.firstWayPoint.latitude - applicationRecord.actualPoint.latitude;
+                temp_ipo = sqrt(sq(temp_cos) + sq(temp_sin));
                 if(temp_cos >= 0 && temp_sin >= 0) {
-                    angle = asin(abs(temp_cos)) * 180.0 / PI;
+                    angle = asin(abs(temp_cos / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos >= 0 && temp_sin < 0) {
-                    angle = 90 + asin(abs(temp_sin)) * 180.0 / PI;
+                    angle = 90 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos < 0 && temp_sin >= 0) {
-                    angle = 270 + asin(abs(temp_sin)) * 180.0 / PI;
+                    angle = 270 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos < 0 && temp_sin < 0) {
-                    angle = 180 + asin(abs(temp_cos)) * 180.0 / PI;
+                    angle = 180 + asin(abs(temp_cos / temp_ipo)) * 180.0 / PI;
                 }
                 led.ledShowDirection(angle);
                 break;

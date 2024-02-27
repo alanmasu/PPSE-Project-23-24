@@ -10,6 +10,8 @@
 
 const uint32_t LED_RED = Adafruit_NeoPixel::Color(255, 0, 0);
 const uint32_t LED_GREEN = Adafruit_NeoPixel::Color(0, 255, 0);
+const uint32_t LED_BLUE = Adafruit_NeoPixel::Color(0, 0, 255);
+const uint32_t LED_YELLOW = Adafruit_NeoPixel::Color(255, 255, 0);
 const uint32_t LED_VIOLET = Adafruit_NeoPixel::Color(200, 0, 255);
 const uint32_t LED_OFF = Adafruit_NeoPixel::Color(0, 0, 0);
 

@@ -239,21 +239,23 @@ void Bussola::update() {
         calibration.magnetometerCalibrationStatus = CALIBRATION_IN_PROGRESS;
         calibration.calibrationStatus = CALIBRATION_IN_PROGRESS;
         calibration_step = 0;
+        pre_calibration_wait_endTime = millis() + PRE_ACCELEROMETER_CALIBRATION_WAIT;
         calibration_time_step_endTime = millis();
       }
+      if(millis() >= pre_calibration_wait_endTime) {
+        if(millis() >= calibration_time_step_endTime) {
+          sensors_event_t magEvent;
+          mag.getEvent(&magEvent);
+          calibration.magnetometer_min.x = min(calibration.magnetometer_min.x, magEvent.magnetic.x);
+          calibration.magnetometer_min.y = min(calibration.magnetometer_min.y, magEvent.magnetic.y);
+          calibration.magnetometer_min.z = min(calibration.magnetometer_min.z, magEvent.magnetic.z);
+          calibration.magnetometer_max.x = max(calibration.magnetometer_max.x, magEvent.magnetic.x);
+          calibration.magnetometer_max.y = max(calibration.magnetometer_max.x, magEvent.magnetic.y);
+          calibration.magnetometer_max.z = max(calibration.magnetometer_max.x, magEvent.magnetic.z);
 
-      if(millis() >= calibration_time_step_endTime) {
-        sensors_event_t magEvent;
-        mag.getEvent(&magEvent);
-        calibration.magnetometer_min.x = min(calibration.magnetometer_min.x, magEvent.magnetic.x);
-        calibration.magnetometer_min.y = min(calibration.magnetometer_min.y, magEvent.magnetic.y);
-        calibration.magnetometer_min.z = min(calibration.magnetometer_min.z, magEvent.magnetic.z);
-        calibration.magnetometer_max.x = max(calibration.magnetometer_max.x, magEvent.magnetic.x);
-        calibration.magnetometer_max.y = max(calibration.magnetometer_max.x, magEvent.magnetic.y);
-        calibration.magnetometer_max.z = max(calibration.magnetometer_max.x, magEvent.magnetic.z);
-
-        calibration_step++;
-        calibration_time_step_endTime = millis() + CALIBRATION_TIME_STEP;
+          calibration_step++;
+          calibration_time_step_endTime = millis() + CALIBRATION_TIME_STEP;
+        }
       }
 
       if(calibration_step >= MAGNETOMETER_CALIBRATION_SAMPLES) {

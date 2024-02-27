@@ -64,16 +64,16 @@ void PSEBoard_WS2812::ledShowCalibration(bool calibrated, bool magnetometer_cali
     t_magnetometer_calibration_led = millis() + MAGNETOMETER_CALIBRATION_LED_TIME;
   }
   if(calibrated) {
-    ledFill(LED_GREEN);
+    ledOff();
   } else {
     if(magnetometer_calibrating) {
       if(blink) {
-        ledFill(LED_RED);
+        ledFill(LED_YELLOW);
       } else {
         ledOff();
       }
     } else {
-      ledFill(LED_RED);
+      ledFill(LED_YELLOW);
     }
   }
   strip.show();
