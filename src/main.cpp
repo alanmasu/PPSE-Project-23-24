@@ -85,10 +85,11 @@ void setup() {
 
     //Inizializzazione bussola
     compass.init();
-    compass.magnetometerRollingRoundig(true);
+    compass.magnetometerRollingRoundig(false);
     compass.accelerometerRollingRoundig(true);
 
     //Inizializzazione led WS2812
+    led.globalBrightness(20);
     led.init();
 
     delay(10);
@@ -147,6 +148,7 @@ void loop() {
     uint8_t sats;
     float hdop;
     float temp_cos, temp_sin, temp_ipo;
+    float compass_offset;
     //Variabili ADC
     int analog;
     float vTempSensor;
@@ -214,13 +216,14 @@ void loop() {
             if(btnDWEdge){
                 actualState = CALIBRATING;
                 updatePage = true;
-                compass.calibrate_accelerometer();
-            }
-            if(compass.getAccelerometerCalibrationStatus() == CALIBRATION_DONE && compass.getMagnetometerCalibrationStatus() == NOT_CALIBRATED) {
                 compass.calibrate_magnetometer();
             }
-            led.ledShowCalibration(compass.getCalibrationStatus() == CALIBRATION_DONE, compass.getMagnetometerCalibrationStatus() == CALIBRATION_IN_PROGRESS);
+            if(compass.getMagnetometerCalibrationStatus() == CALIBRATION_DONE && compass.getAccelerometerCalibrationStatus() == NOT_CALIBRATED) {
+                compass.calibrate_accelerometer();
+            }
+            led.ledShowCalibration(compass.getCalibrationStatus(), compass.getMagnetometerCalibrationStatus());
             if(compass.getCalibrationStatus() == CALIBRATION_DONE) {
+                compass_offset = compass.getDegree();
                 actualState = IDLE;
             }
             break;
@@ -407,7 +410,8 @@ void loop() {
             case IDLE:
             case WAYPOINT:
                 getGpsFixData(&fix, &sats, &hdop);
-                led.ledShowFix(fix && hdop < 5);
+                if(actualPage != PAG_CAL)
+                    led.ledShowFix(fix && hdop < 5);
                 break;
             case FIND:
                 temp_cos = applicationRecord.firstWayPoint.longitude - applicationRecord.actualPoint.longitude;
@@ -416,12 +420,17 @@ void loop() {
                 if(temp_cos >= 0 && temp_sin >= 0) {
                     angle = asin(abs(temp_cos / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos >= 0 && temp_sin < 0) {
-                    angle = 90 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
+                    angle = 90.0 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos < 0 && temp_sin >= 0) {
-                    angle = 270 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
+                    angle = 270.0 + asin(abs(temp_sin / temp_ipo)) * 180.0 / PI;
                 } else if(temp_cos < 0 && temp_sin < 0) {
-                    angle = 180 + asin(abs(temp_cos / temp_ipo)) * 180.0 / PI;
+                    angle = 180.0 + asin(abs(temp_cos / temp_ipo)) * 180.0 / PI;
                 }
+                angle = compass.getDegree() + angle - compass_offset;
+                Serial.print("Angle: "); Serial.println(angle);
+                Serial.print("getDegree(): "); Serial.println(compass.getDegree());
+                Serial.print("Compass offset: "); Serial.println(compass_offset);
+
                 led.ledShowDirection(angle);
                 break;
         }

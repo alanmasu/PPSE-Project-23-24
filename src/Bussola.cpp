@@ -54,6 +54,7 @@ void Bussola::stopResetCalibration() {
   calibration.calibrationStatus = NOT_CALIBRATED;
   calibration.accelerometerCalibrationStatus = NOT_CALIBRATED;
   calibration.magnetometerCalibrationStatus = NOT_CALIBRATED;
+  setFSMState(UPDATING_DATA);
 }
 
 void Bussola::accelerometerRollingRoundig(bool activate) {
@@ -77,13 +78,16 @@ CalibrationStatus_t Bussola::getMagnetometerCalibrationStatus() {
 }
 
 float Bussola::getDegree(float mag_x, float mag_y, float mag_z) {
-  //return atan(sqrt(sq(mag_z) + sq(mag_y))/mag_x) * 180.0 / PI;
-  float temp_degree = atan(mag_y/mag_x) * 180.0 / PI;
-  if(mag_x < 0) {
-    temp_degree += 180.0;
-  }
-  else if(mag_y < 0) {
-    temp_degree += 360.0;
+  float temp_degree;
+  float temp_ipo = sqrt(sq(mag_x) + sq(mag_y));
+  if(mag_x >= 0 && mag_y >= 0) {
+      temp_degree = asin(abs(mag_x / temp_ipo)) * 180.0 / PI;
+  } else if(mag_x >= 0 && mag_y < 0) {
+      temp_degree = asin(abs(mag_y / temp_ipo)) * 180.0 / PI + 90.0;
+  } else if(mag_x < 0 && mag_y < 0) {
+      temp_degree = asin(abs(mag_x / temp_ipo)) * 180.0 / PI + 180.0;
+  } else if(mag_x < 0 && mag_y >= 0) {
+      temp_degree = asin(abs(mag_y / temp_ipo)) * 180.0 / PI + 270.0;
   }
   return temp_degree;
 }
@@ -221,11 +225,7 @@ void Bussola::update() {
         calibration.accelerometerCalibrationStatus = CALIBRATION_DONE;
         calibration.calibrationStatus = (calibration.magnetometerCalibrationStatus == CALIBRATION_DONE)? CALIBRATION_DONE : CALIBRATION_IN_PROGRESS;
         setFSMState(UPDATING_DATA);
-      }
-
-      if(calibration.accelerometerCalibrationStatus == NOT_CALIBRATED) {
-        calibration.calibrationStatus = NOT_CALIBRATED;
-        setFSMState(UPDATING_DATA);
+        update();
       }
       break;
 
@@ -239,7 +239,7 @@ void Bussola::update() {
         calibration.magnetometerCalibrationStatus = CALIBRATION_IN_PROGRESS;
         calibration.calibrationStatus = CALIBRATION_IN_PROGRESS;
         calibration_step = 0;
-        pre_calibration_wait_endTime = millis() + PRE_ACCELEROMETER_CALIBRATION_WAIT;
+        pre_calibration_wait_endTime = millis() + PRE_MAGNETOMETER_CALIBRATION_WAIT;
         calibration_time_step_endTime = millis();
       }
       if(millis() >= pre_calibration_wait_endTime) {
@@ -250,8 +250,8 @@ void Bussola::update() {
           calibration.magnetometer_min.y = min(calibration.magnetometer_min.y, magEvent.magnetic.y);
           calibration.magnetometer_min.z = min(calibration.magnetometer_min.z, magEvent.magnetic.z);
           calibration.magnetometer_max.x = max(calibration.magnetometer_max.x, magEvent.magnetic.x);
-          calibration.magnetometer_max.y = max(calibration.magnetometer_max.x, magEvent.magnetic.y);
-          calibration.magnetometer_max.z = max(calibration.magnetometer_max.x, magEvent.magnetic.z);
+          calibration.magnetometer_max.y = max(calibration.magnetometer_max.y, magEvent.magnetic.y);
+          calibration.magnetometer_max.z = max(calibration.magnetometer_max.z, magEvent.magnetic.z);
 
           calibration_step++;
           calibration_time_step_endTime = millis() + CALIBRATION_TIME_STEP;
@@ -262,14 +262,13 @@ void Bussola::update() {
         calibration.magnetometer_offset.x = 0.0 - ((calibration.magnetometer_min.x + calibration.magnetometer_max.x) / 2.0);
         calibration.magnetometer_offset.y = 0.0 - ((calibration.magnetometer_min.y + calibration.magnetometer_max.y) / 2.0);
         calibration.magnetometer_offset.z = 0.0 - ((calibration.magnetometer_min.z + calibration.magnetometer_max.z) / 2.0);  
+        // Serial.print("Calibration offset x: "); Serial.println(calibration.magnetometer_offset.x);
+        // Serial.print("Calibration offset y: "); Serial.println(calibration.magnetometer_offset.y);
+        // Serial.print("Calibration offset z: "); Serial.println(calibration.magnetometer_offset.z);
         calibration.magnetometerCalibrationStatus = CALIBRATION_DONE;
         calibration.calibrationStatus = (calibration.accelerometerCalibrationStatus == CALIBRATION_DONE)? CALIBRATION_DONE : CALIBRATION_IN_PROGRESS;
         setFSMState(UPDATING_DATA);
-      }
-
-      if(calibration.magnetometerCalibrationStatus == NOT_CALIBRATED) {
-        calibration.calibrationStatus = NOT_CALIBRATED;
-        setFSMState(UPDATING_DATA);
+        update();
       }
       break;
   }

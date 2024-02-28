@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <PSEBoard.h>
+#include <Bussola.h>
 #include <Adafruit_NeoPixel.h>
 #include <PSEBoard_WS2812.h>
 
@@ -58,23 +59,32 @@ void PSEBoard_WS2812::ledShowFix(bool fix) {
   strip.show();
 }
 
-void PSEBoard_WS2812::ledShowCalibration(bool calibrated, bool magnetometer_calibrating) {
+void PSEBoard_WS2812::ledShowCalibration(CalibrationStatus_t calibrationStatus, CalibrationStatus_t magnetometerCalibrationStatus) {
   if(millis() >= t_magnetometer_calibration_led) {
     blink = !blink;
     t_magnetometer_calibration_led = millis() + MAGNETOMETER_CALIBRATION_LED_TIME;
   }
-  if(calibrated) {
-    ledOff();
-  } else {
-    if(magnetometer_calibrating) {
-      if(blink) {
-        ledFill(LED_YELLOW);
-      } else {
-        ledOff();
+  switch(calibrationStatus) {
+    case NOT_CALIBRATED:
+      ledOff();
+      break;
+    case CALIBRATION_IN_PROGRESS:
+      switch(magnetometerCalibrationStatus) {
+        case CALIBRATION_IN_PROGRESS:
+          if(blink) {
+            ledFill(LED_YELLOW);
+          } else {
+            ledOff();
+          }
+          break;
+        default:
+          ledFill(LED_YELLOW);
+          break;
       }
-    } else {
-      ledFill(LED_YELLOW);
-    }
+      break;
+    case CALIBRATION_DONE:
+      ledFill(LED_BLUE);
+      break;
   }
   strip.show();
 }

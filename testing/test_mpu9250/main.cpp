@@ -20,8 +20,8 @@ void setup(void)
     Serial.println("Accelerometer and Compass Test"); Serial.println("");
     Serial.print("Is the class Bussola Initialized? "); Serial.println(bus.isClassInitialized());
     bus.init();
-    bus.accelerometerRollingRoundig(true);
-    bus.magnetometerRollingRoundig(true);
+    bus.accelerometerRollingRoundig(false);
+    bus.magnetometerRollingRoundig(false);
     Serial.print("Is the class Bussola Initialized? "); Serial.println(bus.isClassInitialized());
     Serial.print("Is sensor Calibrated? (yes = 2) "); Serial.println(bus.getCalibrationStatus());
     bus.calibrate_accelerometer();

@@ -1,5 +1,8 @@
+#ifndef __PSEBOARD_WS2812_H__
+#define __PSEBOARD_WS2812_H__
 #include <Arduino.h>
 #include <PSEBoard.h>
+#include <Bussola.h>
 #include <Adafruit_NeoPixel.h>
 
 #define LED_COUNT 8
@@ -21,7 +24,7 @@ class PSEBoard_WS2812 {
         void globalBrightness(uint8_t brightness);
         void ledShowDirection(float angle);
         void ledShowFix(bool fix);
-        void ledShowCalibration(bool calibrated, bool magnetometer_calibrating = false);
+        void ledShowCalibration(CalibrationStatus_t calibrationStatus, CalibrationStatus_t magnetometerCalibrationStatus);
         void ledOffShow();
         void ledFill(uint32_t color, bool show = false);
 
@@ -31,3 +34,4 @@ class PSEBoard_WS2812 {
         unsigned long long t_magnetometer_calibration_led;
         Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, WS2812_PIN, NEO_GRB + NEO_KHZ800);
 };
+#endif
