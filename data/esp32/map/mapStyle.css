@@ -1,0 +1,32 @@
+/* 
+ * Always set the map height explicitly to define the size of the div element
+ * that contains the map. 
+ */
+ /* Map Iframe class */
+.mapFrame { 
+  height: 80%;  /*altezza*/
+  width: 100%;  /*larghezza*/
+}
+
+/* Map div for leaflet scopes */
+#map{
+  height: 100%;
+  width: 100%;
+}
+
+/* Map Article */
+.map-box {
+  width: 80%;
+}
+
+@media screen and (max-width: 992px){
+  .map-box {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 600px){
+  .map-box {
+    width: 100%;
+  }
+}

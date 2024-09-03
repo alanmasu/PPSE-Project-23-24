@@ -1,0 +1,23 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html {
+  background-color: #f8f8f8d1
+}
+.container {
+  display: flex;
+  justify-content: center;
+  height: 85vh;
+}    
+
+.field{
+  display: inline;
+}
+
+nav{
+  padding-right: 1rem;
+  padding-left: 1rem;
+  background-color: #adb5d1;
+}

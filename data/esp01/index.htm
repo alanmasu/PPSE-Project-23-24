@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>PSE Board 2023</title>
+  
+  <!--Pico - Minimal CSS Framework for semantic info: HTML https://picocss.com/ -->
+  <!--<link rel="stylesheet" type="text/css" href="css/pico.min.css">-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+
+  <!-- Cyustom page styling -->
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+</head>
+<body onload="onLoad()">
+  <nav>
+    <ul>
+      <li><strong>PPSE Project</strong></li>
+    </ul>
+    <ul>
+      <li><a href="/setup">Setup</a></li>
+      <li><a href="map/mapPage.html">Map</a></li>
+    </ul>
+  </nav>
+  <main class="container">
+    <article class="grid">
+      <div>
+        <h1>Temperature</h1>
+          <b>CPU Temperature: </b> <div class="field" id="cpu-temp">30 C°</div>
+          <br>
+          <b>Temperature: </b> <div class="field" id="temp">30 C°</div>
+        <h1>Onboard LED Switcher</h1>
+          <label for="toggle-OB-led">
+            <input type="checkbox" role="switch" id="toggle-OB-led" name="toggle-OB-led">
+            Toggle LED
+          </label>
+      </div>
+    </article>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
